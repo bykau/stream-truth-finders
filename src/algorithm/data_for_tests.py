@@ -1,3 +1,5 @@
+__all__ = ['get_observed_cases']
+
 import datetime
 
 observed_cases = [
