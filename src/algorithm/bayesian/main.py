@@ -42,59 +42,76 @@ def cef_initialization(c, e, observed):
 
 
 if __name__ == '__main__':
-    ground_truth = ['Wisc', 'MSR']
+    # ground_truth = ['Wisc', 'MSR']
 
     observed_cases = cook_raw_value(get_observed_cases())
+    observed_keys = sorted(observed_cases[0].keys())
+    cef_measures = cef_initialization(c=0.99, e=0.95, observed=observed_cases[0])
+    set_of_life_spans = []
+    sources_number = len(observed_keys)
+    cases_number = len(observed_cases)
 
     for case_number, observed in enumerate(observed_cases):
-        observed_keys = sorted(observed.keys())
-        cef_measures = cef_initialization(c=0.5, e=0.5, observed=observed)
-
         iter_quantity = 0
-        sources_number = len(observed_keys)
         life_span = get_life_span(observed=observed, cef_measures=cef_measures)
+        set_of_life_spans.append(life_span)
 
         # print initial info
         print 'CASE NUMBER: {}'.format(case_number)
-        print 'Ground truth: {}'.format(ground_truth)
+        # print 'Ground truth: {}'.format(ground_truth)
         for key in observed_keys:
             print '{}: {}'.format(key, observed.get(key)[1])
         print 'Initial life span: {}'.format(life_span)
-        life_span_old = []
+    print '---------------------'
 
-        cef_for_each_s_old = [cef_measures.get(s) for s in observed_keys]
-        ce_delta_sum = [1, 1]
-        while max(ce_delta_sum) > 0.01*sources_number:
-            cef_for_each_s = []
-            observed_changed = observed.copy()
-            observed_changed.update({'life_span': life_span})
-            observed_changed = cook_raw_value([observed_changed])[0]
-            for s in observed_keys:
-                cef = get_CEF(life_span=observed_changed.get('life_span'), source_data=observed_changed.get(s))
-                cef_measures.update({s: cef})
-                cef_for_each_s.append(cef)
+    cef_for_each_s_old = [cef_measures.get(s) for s in observed_keys]
+    ce_delta_sum = [1, 1]
+    while max(ce_delta_sum) > 0.01*sources_number*cases_number:
+        cef_for_each_s = []
+        observed_cases_changed = [] + observed_cases
+        for observed_case_index in range(cases_number):
+            observed_cases_changed[observed_case_index].update({'life_span': set_of_life_spans[observed_case_index]})
+        observed_cases_changed = cook_raw_value(observed_cases_changed)
 
-            life_span_old = life_span
-            life_span = get_life_span(observed=observed, cef_measures=cef_measures)
-            iter_quantity += 1
+        time_points = observed_cases_changed[0].get('life_span')[0]
+        for s in observed_keys:
+            life_span_set = []
+            sources_data = []
+            time_points = []
+            for case in observed_cases_changed:
+                life_span_set.append(case.get('life_span')[1])
+                sources_data.append(case.get(s)[1])
+                time_points.append(case.get('life_span')[0])
+            cef = get_CEF(life_span_set=life_span_set,
+                          sources_data=sources_data,
+                          time_points=time_points)
+            cef_measures.update({s: cef})
+            cef_for_each_s.append(cef)
 
-            ce_delta_sum = [0, 0]
-            for old, new in zip(cef_for_each_s_old, cef_for_each_s):
-                diff_for_s = [abs(x-y) for x, y in zip(old[0:2], new[0:2])]
-                for i in range(len(ce_delta_sum)):
-                    ce_delta_sum[i] += diff_for_s[i]
-            cef_for_each_s_old = cef_for_each_s
-            majority_voting_result = majority_voting(observed)
+        set_of_life_spans = []
+        for observed_changed in observed_cases_changed:
+            del observed_changed['life_span']
+            life_span = get_life_span(observed=observed_changed, cef_measures=cef_measures)
+            set_of_life_spans.append(life_span)
 
-            print '---------------------'
-            print 'iter={}'.format(iter_quantity)
-            print 'ce_delta_sum: {}'.format(ce_delta_sum)
-            for cef, s in zip(cef_for_each_s, observed_keys):
-                print s, ': C={}, E={}, F={}'.format(cef[0], cef[1], cef[2])
-            print "Object's life span: {} {}%" \
-                .format(life_span, get_truth_overlap(ground_truth, life_span))
-            print 'Majority voting results: {} {}%' \
-                .format(majority_voting_result, get_truth_overlap(ground_truth, majority_voting_result))
+        ce_delta_sum = [0, 0]
+        for old, new in zip(cef_for_each_s_old, cef_for_each_s):
+            diff_for_s = [abs(x-y) for x, y in zip(old[0:2], new[0:2])]
+            for i in range(len(ce_delta_sum)):
+                ce_delta_sum[i] += diff_for_s[i]
+        cef_for_each_s_old = cef_for_each_s
+        # majority_voting_result = majority_voting(observed)
 
-        print 'iter_quantity={}'.format(iter_quantity)
-        print "*********************************************************"
+        iter_quantity += 1
+        print '---------------------'
+        print 'iter={}'.format(iter_quantity)
+        print 'ce_delta_sum: {}'.format(ce_delta_sum)
+        for cef, s in zip(cef_for_each_s, observed_keys):
+            print s, ': C={}, E={}, F={}'.format(cef[0], cef[1], cef[2])
+        print "Object's life span: {}".format(set_of_life_spans)
+            # .format(life_span, get_truth_overlap(ground_truth, life_span))
+        # print 'Majority voting results: {} {}%' \
+        #     .format(majority_voting_result, get_truth_overlap(ground_truth, majority_voting_result))
+
+    print 'iter_quantity={}'.format(iter_quantity)
+    print "*********************************************************"
