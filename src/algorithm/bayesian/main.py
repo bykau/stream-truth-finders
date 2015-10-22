@@ -57,7 +57,7 @@ if __name__ == '__main__':
         set_of_life_spans.append(life_span)
 
         # print initial info
-        print 'CASE NUMBER: {}'.format(case_number)
+        print 'OBJECT NUMBER: {}'.format(case_number)
         # print 'Ground truth: {}'.format(ground_truth)
         for key in observed_keys:
             print '{}: {}'.format(key, observed.get(key)[1])
@@ -108,8 +108,11 @@ if __name__ == '__main__':
         print 'ce_delta_sum: {}'.format(ce_delta_sum)
         for cef, s in zip(cef_for_each_s, observed_keys):
             print s, ': C={}, E={}, F={}'.format(cef[0], cef[1], cef[2])
-        print "Object's life span: {}".format(set_of_life_spans)
-            # .format(life_span, get_truth_overlap(ground_truth, life_span))
+        for case_index, life_span in enumerate(set_of_life_spans):
+            list_to_print = []
+            for t, val in zip(life_span[0], life_span[1]):
+                list_to_print.append([t.strftime('%Y'), val])
+            print "Object {} life span: {}".format(case_index, list_to_print)
         # print 'Majority voting results: {} {}%' \
         #     .format(majority_voting_result, get_truth_overlap(ground_truth, majority_voting_result))
 
