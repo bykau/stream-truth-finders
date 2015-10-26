@@ -4,17 +4,28 @@ import operator
 def get_initial_value(observed, cef_measures):
     initial_values = []
     observed_keys = sorted(observed.keys())
+    all_possible_values = []
     for s in observed_keys:
-        value = observed.get(s)[1][0]
+        observed_values = observed.get(s)[1]
+        all_possible_values += observed_values
+        for value in observed_values:
+            if value:
+                break
         if value not in initial_values:
             initial_values.append(value)
 
+    all_possible_values = list(set(all_possible_values))
+    if None in all_possible_values:
+        all_possible_values.remove(None)
     likelihood = {}
     for value in initial_values:
         p = 1
         for s in observed_keys:
-            m = len(observed.get(s)[1])
-            observed_value = observed.get(s)[1][0]
+            m = len(all_possible_values)-1
+            observed_values = observed.get(s)[1]
+            for observed_value in observed_values:
+                if observed_value:
+                    break
             coverage = cef_measures.get(s)[0]
             exactness = cef_measures.get(s)[1]
 
@@ -31,19 +42,15 @@ def get_initial_value(observed, cef_measures):
         likelihood.update({value: p})
 
     max_likelihood_value = max(likelihood.iteritems(), key=operator.itemgetter(1))[0]
-    while not max_likelihood_value:
-        del likelihood[max_likelihood_value]
-        max_likelihood_value = max(likelihood.iteritems(), key=operator.itemgetter(1))[0]
 
-    return max_likelihood_value
+    return max_likelihood_value, m
 
 
 def get_life_span(observed, cef_measures):
     life_span = [[], []]
-    initial_value = get_initial_value(observed, cef_measures)
+    initial_value, m = get_initial_value(observed, cef_measures)
     observation_len = len(observed.get(observed.keys()[0])[1])
     observed_keys = sorted(observed.keys())
-
     start_time = observed.get(observed_keys[0])[0][0]
     end_time = observed.get(observed_keys[0])[0][observation_len-1]
     life_span[0].append(start_time)
@@ -114,7 +121,7 @@ def get_life_span(observed, cef_measures):
                                 tu_1_index -= 1
                             if tr == observation_time[tr_last_index+1] and observed_val == potential_values[0]:
                                 p_no_transition *= (1-exactness)*float((tu-tu_1).total_seconds()) \
-                                                   /(observation_len*float((end_time-life_span_pre_time).total_seconds()))
+                                                   /(m*float((end_time-life_span_pre_time).total_seconds()))
                             if observed_val == v:
                                 time_delta = tu - tr
                                 if len(freshness) == 1:
@@ -130,7 +137,7 @@ def get_life_span(observed, cef_measures):
                                 p *= exactness*coverage*f
                             else:
                                 p *= (1-exactness)*float((tu-tu_1).total_seconds()) \
-                                     /(observation_len*float((end_time-life_span_pre_time).total_seconds()))
+                                     /(m*float((end_time-life_span_pre_time).total_seconds()))
                             break
                 likelihood.update({p: [tr, v]})
         p_max = max(likelihood.keys())
