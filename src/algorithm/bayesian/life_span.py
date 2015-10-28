@@ -81,14 +81,27 @@ def get_life_span(observed, cef_measures):
             for v in potential_values:
                 p = 1
                 for s in observed_keys:
-                    s_values = observed.get(s)[1]
                     coverage = cef_measures.get(s)[0]
                     exactness = cef_measures.get(s)[1]
                     freshness = cef_measures.get(s)[2]
                     freshness_keys = sorted(freshness.keys())
-                    observed_values = observed.get(s)[1][tr_index+1:]
+                    s_values = observed.get(s)[1]
+                    observed_values = s_values[tr_index:]
                     for observed_val_index, observed_val in enumerate(observed_values):
-                        if observed_val == observed.get(s)[1][tr_index]:
+                        tu = observation_time[tr_index+observed_val_index]
+                        tu_1_index = tr_index+observed_val_index-1
+                        while tu_1_index > 0:
+                            val_tu_1 = s_values[tu_1_index]
+                            prev_val = s_values[tu_1_index-1]
+                            if val_tu_1 != prev_val:
+                                tu_1 = observation_time[tu_1_index]
+                                break
+                            elif tu_1_index-1 == 0:
+                                tu_1 = observation_time[0]
+                                tu_1_index -= 1
+                                break
+                            tu_1_index -= 1
+                        if observed_val == s_values[tu_1_index]:
                             if observed_val_index == len(observed_values)-1:
                                 time_delta = end_time - tr
                                 if tr == observation_time[tr_last_index+1] and observed_val == potential_values[0]:
@@ -103,22 +116,23 @@ def get_life_span(observed, cef_measures):
                                         elif t == freshness_keys[-2]:
                                             f = 1.
                                             break
-                                p *= exactness*(1-coverage*f)
+                                p *= exactness*(1-coverage)*f
                             else:
                                 continue
                         else:
-                            tu = observation_time[tr_index+observed_val_index+1]
-                            tu_1_index = tr_index+observed_val_index
-                            while tu_1_index > 0:
-                                val_tu_1 = s_values[tu_1_index]
-                                prev_val = s_values[tu_1_index-1]
-                                if val_tu_1 != prev_val:
-                                    tu_1 = observation_time[tu_1_index]
-                                    break
-                                elif tu_1_index-1 == 0:
-                                    tu_1 = observation_time[0]
-                                    break
-                                tu_1_index -= 1
+                            # tu = observation_time[tr_index+observed_val_index]
+                            # tu_1_index = tr_index+observed_val_index-1
+                            # while tu_1_index > 0:
+                            #     val_tu_1 = s_values[tu_1_index]
+                            #     prev_val = s_values[tu_1_index-1]
+                            #     if val_tu_1 != prev_val:
+                            #         tu_1 = observation_time[tu_1_index]
+                            #         break
+                            #     elif tu_1_index-1 == 0:
+                            #         tu_1 = observation_time[0]
+                            #         tu_1_index -= 1
+                            #         break
+                            #     tu_1_index -= 1
                             if tr == observation_time[tr_last_index+1] and observed_val == potential_values[0]:
                                 p_no_transition *= (1-exactness)*float((tu-tu_1).total_seconds()) \
                                                    /(m*float((end_time-life_span_pre_time).total_seconds()))

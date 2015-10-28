@@ -27,16 +27,17 @@ def cef_initialization(c, e, observed):
         if delta > delta_max:
             delta_max = delta
     f = 0.
-    f_item = 1./3
-    t_item = delta_max/3
-    delta = timedelta(seconds=0)
+    # f_item = 1./3
+    # t_item = delta_max/3
+    # delta = timedelta(seconds=0)
     # while delta <= delta_max:
     #     f_init.update({delta: f})
     #     f += f_item
     #     delta += t_item
     f_init = {timedelta(days=0): 0.1,
          timedelta(days=365): 0.2,
-         timedelta(days=366): 0.2}
+         timedelta(days=366): 0.2,
+         timedelta(days=367): 1.}
     for s in observed_keys:
         cef = [c, e, f_init]
         cef_measures.update({s: cef})
