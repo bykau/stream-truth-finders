@@ -104,7 +104,7 @@ def get_life_span(observed, cef_measures):
                         if observed_val == s_values[tu_1_index]:
                             if observed_val_index == len(observed_values)-1:
                                 time_delta = end_time - tr
-                                if tr == observation_time[tr_last_index+1] and observed_val == potential_values[0]:
+                                if tr == observation_time[tr_last_index+1] and v == potential_values[0]:
                                     p_no_transition *= exactness
                                 if len(freshness) == 1:
                                     f = 0.0
@@ -120,20 +120,7 @@ def get_life_span(observed, cef_measures):
                             else:
                                 continue
                         else:
-                            # tu = observation_time[tr_index+observed_val_index]
-                            # tu_1_index = tr_index+observed_val_index-1
-                            # while tu_1_index > 0:
-                            #     val_tu_1 = s_values[tu_1_index]
-                            #     prev_val = s_values[tu_1_index-1]
-                            #     if val_tu_1 != prev_val:
-                            #         tu_1 = observation_time[tu_1_index]
-                            #         break
-                            #     elif tu_1_index-1 == 0:
-                            #         tu_1 = observation_time[0]
-                            #         tu_1_index -= 1
-                            #         break
-                            #     tu_1_index -= 1
-                            if tr == observation_time[tr_last_index+1] and observed_val == potential_values[0]:
+                            if tr == observation_time[tr_last_index+1] and v == potential_values[0]:
                                 p_no_transition *= (1-exactness)*float((tu-tu_1).total_seconds()) \
                                                    /(m*float((end_time-life_span_pre_time).total_seconds()))
                             if observed_val == v:
@@ -156,13 +143,11 @@ def get_life_span(observed, cef_measures):
                 likelihood.update({p: [tr, v]})
         p_max = max(likelihood.keys())
         max_likelihood_value = likelihood.get(p_max)
-        life_span[0].append(max_likelihood_value[0])
-        life_span[1].append(max_likelihood_value[1])
-        # if p_max > p_no_transition:
-        #     life_span[0].append(max_likelihood_value[0])
-        #     life_span[1].append(max_likelihood_value[1])
-        # else:
-        #     break
+        if p_max > p_no_transition:
+            life_span[0].append(max_likelihood_value[0])
+            life_span[1].append(max_likelihood_value[1])
+        else:
+            break
 
         tr_last = max_likelihood_value[0]
         tr_last_index = observation_time.index(tr_last)
