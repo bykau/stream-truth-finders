@@ -27,17 +27,17 @@ def cef_initialization(c, e, observed):
         if delta > delta_max:
             delta_max = delta
     f = 0.
-    # f_item = 1./3
-    # t_item = delta_max/3
-    # delta = timedelta(seconds=0)
-    # while delta <= delta_max:
-    #     f_init.update({delta: f})
-    #     f += f_item
-    #     delta += t_item
-    f_init = {timedelta(days=0): 0.1,
-         timedelta(days=365): 0.2,
-         timedelta(days=366): 0.2,
-         timedelta(days=367): 1.}
+    f_item = 1./3
+    t_item = delta_max/3
+    delta = timedelta(seconds=0)
+    while delta <= delta_max:
+        f_init.update({delta: f})
+        f += f_item
+        delta += t_item
+    # f_init = {timedelta(days=0): 0.1,
+    #      timedelta(days=365): 0.2,
+    #      timedelta(days=366): 0.2,
+    #      timedelta(days=367): 1.}
     for s in observed_keys:
         cef = [c, e, f_init]
         cef_measures.update({s: cef})
@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
     cef_for_each_s_old = [cef_measures.get(s) for s in observed_keys]
     ce_delta_sum = [1, 1]
-    while max(ce_delta_sum) > 0.01*sources_number*cases_number:
+    while max(ce_delta_sum) > 0.001*sources_number*cases_number:
         cef_for_each_s = []
         observed_cases_changed = [] + observed_cases
         for observed_case_index in range(cases_number):
@@ -115,7 +115,7 @@ if __name__ == '__main__':
         for case_index, life_span in enumerate(set_of_life_spans):
             list_to_print = []
             for t, val in zip(life_span[0], life_span[1]):
-                list_to_print.append([t.strftime('%Y'), val])
+                list_to_print.append([t.strftime('%Y-%m-%d %H:%M:%S'), val])
             print "Object {} life span: {}".format(case_index, list_to_print)
         # print 'Majority voting results: {} {}%' \
         #     .format(majority_voting_result, get_truth_overlap(ground_truth, majority_voting_result))

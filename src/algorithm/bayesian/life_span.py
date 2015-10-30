@@ -8,13 +8,14 @@ def get_initial_value(observed, cef_measures):
     for s in observed_keys:
         observed_values = observed.get(s)[1]
         all_possible_values += observed_values
-        for value in observed_values:
-            if value:
-                break
+    for s in observed_keys:
+        value = observed.get(s)[1][0]
         if value not in initial_values:
             initial_values.append(value)
 
     all_possible_values = list(set(all_possible_values))
+    if None in initial_values:
+        initial_values.remove(None)
     if None in all_possible_values:
         all_possible_values.remove(None)
     likelihood = {}
@@ -22,10 +23,7 @@ def get_initial_value(observed, cef_measures):
         p = 1
         for s in observed_keys:
             m = len(all_possible_values)-1
-            observed_values = observed.get(s)[1]
-            for observed_value in observed_values:
-                if observed_value:
-                    break
+            observed_value = observed.get(s)[1][0]
             coverage = cef_measures.get(s)[0]
             exactness = cef_measures.get(s)[1]
 
@@ -101,6 +99,7 @@ def get_life_span(observed, cef_measures):
                                 tu_1_index -= 1
                                 break
                             tu_1_index -= 1
+                        tu_1 = observation_time[tu_1_index]
                         if observed_val == s_values[tu_1_index]:
                             if observed_val_index == len(observed_values)-1:
                                 time_delta = end_time - tr
