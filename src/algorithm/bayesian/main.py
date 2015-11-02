@@ -26,18 +26,18 @@ def cef_initialization(c, e, observed):
         delta = time_observation[t_index+1]-t
         if delta > delta_max:
             delta_max = delta
-    f = 0.
-    f_item = 1./3
-    t_item = delta_max/3
-    delta = timedelta(seconds=0)
-    while delta <= delta_max:
-        f_init.update({delta: f})
-        f += f_item
-        delta += t_item
-    # f_init = {timedelta(days=0): 0.1,
-    #      timedelta(days=365): 0.2,
-    #      timedelta(days=366): 0.2,
-    #      timedelta(days=367): 1.}
+    # f = 0.
+    # f_item = 1./3
+    # t_item = delta_max/3
+    # delta = timedelta(seconds=0)
+    # while delta <= delta_max:
+    #     f_init.update({delta: f})
+    #     f += f_item
+    #     delta += t_item
+    f_init = {timedelta(days=0): 0.1,
+         timedelta(days=365): 0.2,
+         timedelta(days=366): 0.2,
+         timedelta(days=730): 1.0}
     for s in observed_keys:
         cef = [c, e, f_init]
         cef_measures.update({s: cef})
@@ -47,8 +47,8 @@ def cef_initialization(c, e, observed):
 
 if __name__ == '__main__':
     # ground_truth = ['Wisc', 'MSR']
-
-    observed_cases = cook_raw_value(get_observed_cases())
+    raw_cases = get_observed_cases()
+    observed_cases = cook_raw_value(raw_cases)
     observed_keys = sorted(observed_cases[0].keys())
     cef_measures = cef_initialization(c=0.99, e=0.95, observed=observed_cases[0])
     set_of_life_spans = []
@@ -82,13 +82,10 @@ if __name__ == '__main__':
             life_span_set = []
             sources_data = []
             time_points = []
-            for case in observed_cases_changed:
-                life_span_set.append(case.get('life_span')[1])
-                sources_data.append(case.get(s)[1])
-                time_points.append(case.get('life_span')[0])
-            cef = get_CEF(life_span_set=life_span_set,
-                          sources_data=sources_data,
-                          time_points=time_points)
+            for case in raw_cases:
+                sources_data.append(case.get(s))
+            cef = get_CEF(life_span_set=set_of_life_spans,
+                          sources_data=sources_data)
             cef_measures.update({s: cef})
             cef_for_each_s.append(cef)
 

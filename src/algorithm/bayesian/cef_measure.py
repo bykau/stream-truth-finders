@@ -1,7 +1,8 @@
 from datetime import timedelta
+from raw_value_preparation import cook_raw_value
 
 
-def get_CEF(life_span_set, sources_data, time_points):
+def get_CEF(life_span_set, sources_data):
     """
     :param O:
     :param S:
@@ -16,9 +17,22 @@ def get_CEF(life_span_set, sources_data, time_points):
     """
     cl = c = ml = m = 0
     data_for_freshness = []
-    for O, S, s_time_points in zip(life_span_set, sources_data, time_points):
+    for s_life_span, s_data in zip(life_span_set, sources_data):
+        synchronised_values = cook_raw_value([{'S': s_life_span, 'O': s_data}])[0]
+        O = synchronised_values.get('O')[1]
+        S = synchronised_values.get('S')[1]
+        s_time_points = synchronised_values.get('S')[0]
         N = len(s_time_points)
         for i in range(N-1):
+            if O[i] == S[i] and i == 0:
+                c += 1
+                cl += 1
+                data_for_freshness.append(timedelta(seconds=0))
+            elif O[i] == S[i] and O[i] != O[i-1] and S[i] != S[i-1]:
+                c += 1
+                cl += 1
+                data_for_freshness.append(timedelta(seconds=0))
+
             ml += 1
             if O[i] != S[i]:
                 cl += 1
@@ -28,17 +42,16 @@ def get_CEF(life_span_set, sources_data, time_points):
                 elif O[i+1] != S[i+1]:
                     m += 1
 
-            if O[i] == S[i] and O[i+1] != S[i+1]:
-                m += 1
+            # if O[i] == S[i] and O[i+1] != S[i+1]:
+            #     m += 1
 
-        # cl += 1
         ml += 1
-        # if O[0] == S[0]:
-        #     c += 1
-        # else:
-        #     m += 1
         if O[N-1] != S[N-1]:
             cl += 1
+        elif O[N-1] != O[N-2] and S[N-1] != S[N-2]:
+                c += 1
+                cl += 1
+                data_for_freshness.append(timedelta(seconds=0))
 
     c = float(c)
     exac = 1 - float(m)/ml
