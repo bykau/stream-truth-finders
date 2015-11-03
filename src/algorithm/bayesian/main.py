@@ -1,9 +1,10 @@
+import csv
+
 from cef_measure import get_CEF
 from life_span import get_life_span
 from algorithm_competitors import majority_voting
 from raw_value_preparation import cook_raw_value
 from datetime import timedelta
-
 from src.algorithm import get_observed_cases
 
 
@@ -46,6 +47,12 @@ def cef_initialization(c, e, observed):
 
 
 if __name__ == '__main__':
+    headers = ['Round', 'Life span',
+                'S1.C', 'S1.E', 'S1.F, days',
+                'S2.C', 'S2.E', 'S2.F, days',
+                'S3.C', 'S3.E', 'S3.F, days',
+                'S4.C', 'S4.E', 'S4.F, days',
+                'S5.C', 'S5.E', 'S5.F, days']
     # ground_truth = ['Wisc', 'MSR']
     raw_cases = get_observed_cases()
     observed_cases = cook_raw_value(raw_cases)
@@ -55,8 +62,9 @@ if __name__ == '__main__':
     sources_number = len(observed_keys)
     cases_number = len(observed_cases)
 
+    iter_quantity = 0
+    data_for_csv = {}
     for case_number, observed in enumerate(observed_cases):
-        iter_quantity = 0
         life_span = get_life_span(observed=observed, cef_measures=cef_measures)
         set_of_life_spans.append(life_span)
 
@@ -66,6 +74,15 @@ if __name__ == '__main__':
         for key in observed_keys:
             print '{}: {}'.format(key, observed.get(key)[1])
         print 'Initial life span: {}'.format(life_span)
+        life_span_to_csv = []
+        for t, val in zip(life_span[0], life_span[1]):
+            life_span_to_csv.append([t.strftime('%Y'), val])
+        cef_for_csv = []
+        for s in observed_keys:
+            cef = cef_measures[s]
+            f_for_print = ['{}: {}'.format(t.days, cef[2][t]) for t in sorted(cef[2].keys())]
+            cef_for_csv += [round(cef[0], 3), round(cef[1], 3), f_for_print]
+        data_for_csv.update({case_number: [headers, [0] + [life_span_to_csv] + cef_for_csv]})
     print '---------------------'
 
     cef_for_each_s_old = [cef_measures.get(s) for s in observed_keys]
@@ -105,17 +122,29 @@ if __name__ == '__main__':
 
         iter_quantity += 1
         print '---------------------'
-        print 'iter={}'.format(iter_quantity)
+        print 'round={}'.format(iter_quantity)
         print 'ce_delta_sum: {}'.format(ce_delta_sum)
+        cef_for_csv = []
         for cef, s in zip(cef_for_each_s, observed_keys):
             print s, ': C={}, E={}, F={}'.format(cef[0], cef[1], cef[2])
+            f_for_print = ['{}: {}'.format(t.days, cef[2][t]) for t in sorted(cef[2].keys())]
+            cef_for_csv += [round(cef[0], 3), round(cef[1], 3), f_for_print]
         for case_index, life_span in enumerate(set_of_life_spans):
             list_to_print = []
             for t, val in zip(life_span[0], life_span[1]):
-                list_to_print.append([t.strftime('%Y-%m-%d %H:%M:%S'), val])
+                list_to_print.append([t.strftime('%Y'), val])
             print "Object {} life span: {}".format(case_index, list_to_print)
+            list_to_csv = [] + [str(iter_quantity)] + [str(list_to_print)] + cef_for_csv
+            data = data_for_csv[case_index] + [list_to_csv]
+            data_for_csv.update({case_index: data})
         # print 'Majority voting results: {} {}%' \
         #     .format(majority_voting_result, get_truth_overlap(ground_truth, majority_voting_result))
 
     print 'iter_quantity={}'.format(iter_quantity)
     print "*********************************************************"
+
+    objects_names = ['Stonebraker', 'Dewitt', 'Bernstein', 'Carey', 'Halevy']
+    with open('output_data.csv', 'w') as result_file:
+        wr = csv.writer(result_file,  dialect='excel')
+        for obj, name in zip(data_for_csv, objects_names):
+                wr.writerows([[name]] + data_for_csv[obj] + [''] + [''])
