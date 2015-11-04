@@ -27,10 +27,12 @@ def get_CEF(life_span_set, sources_data):
             if O[i] == S[i] and i == 0:
                 c += 1
                 cl += 1
+                ml += 1
                 data_for_freshness.append(timedelta(seconds=0))
             elif O[i] == S[i] and O[i] != O[i-1] and S[i] != S[i-1]:
                 c += 1
                 cl += 1
+                ml += 1
                 data_for_freshness.append(timedelta(seconds=0))
 
             ml += 1
@@ -45,13 +47,14 @@ def get_CEF(life_span_set, sources_data):
             # if O[i] == S[i] and O[i+1] != S[i+1]:
             #     m += 1
 
+        if O[N-1] == S[N-1] and O[N-1] != O[N-2] and S[N-1] != S[N-2]:
+                c += 1
+                cl += 1
+                ml += 1
+                data_for_freshness.append(timedelta(seconds=0))
         ml += 1
         if O[N-1] != S[N-1]:
             cl += 1
-        elif O[N-1] != O[N-2] and S[N-1] != S[N-2]:
-                c += 1
-                cl += 1
-                data_for_freshness.append(timedelta(seconds=0))
 
     c = float(c)
     exac = 1 - float(m)/ml

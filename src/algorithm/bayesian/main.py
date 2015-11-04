@@ -27,9 +27,9 @@ def cef_initialization(c, e, observed):
         delta = time_observation[t_index+1]-t
         if delta > delta_max:
             delta_max = delta
-    # f = 0.
-    # f_item = 1./3
-    # t_item = delta_max/3
+    # f_item = 1./6
+    # t_item = delta_max/5
+    # f = f_item
     # delta = timedelta(seconds=0)
     # while delta <= delta_max:
     #     f_init.update({delta: f})
