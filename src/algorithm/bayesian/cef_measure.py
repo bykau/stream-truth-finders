@@ -18,7 +18,7 @@ def get_CEF(life_span_set, sources_data):
     cl = c = ml = m = 0
     data_for_freshness = []
     for s_life_span, s_data in zip(life_span_set, sources_data):
-        synchronised_values = cook_raw_value([{'S': s_life_span, 'O': s_data}])[0]
+        synchronised_values = cook_raw_value([{'O': s_life_span, 'S': s_data}])[0]
         O = synchronised_values.get('O')[1]
         S = synchronised_values.get('S')[1]
         s_time_points = synchronised_values.get('S')[0]
