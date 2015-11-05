@@ -143,7 +143,7 @@ if __name__ == '__main__':
     print 'iter_quantity={}'.format(iter_quantity)
     print "*********************************************************"
 
-    objects_names = ['Stonebraker', 'Dewitt', 'Bernstein', 'Carey', 'Halevy']
+    objects_names = ['Normalization', 'Stonebraker', 'Dewitt', 'Bernstein', 'Carey', 'Halevy']
     with open('output_data.csv', 'w') as result_file:
         wr = csv.writer(result_file,  dialect='excel')
         for obj, name in zip(data_for_csv, objects_names):

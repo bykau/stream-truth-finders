@@ -4,7 +4,7 @@ import datetime
 
 observed_cases = [
     # case 0 from article
-    # normalisation
+    # normalization
     {
         'S1': [['2000-01-01 00:00:00', '2001-01-01 00:00:00', '2002-01-01 00:00:00',
                 '2003-01-01 00:00:00', '2004-01-01 00:00:00', '2005-01-01 00:00:00',
