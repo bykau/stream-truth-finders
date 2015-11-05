@@ -105,16 +105,13 @@ def get_life_span(observed, cef_measures):
                                 time_delta = end_time - tr
                                 if tr == observation_time[tr_last_index+1] and v == potential_values[0]:
                                     p_no_transition *= exactness
-                                if len(freshness) == 1:
-                                    f = 0.0
-                                else:
-                                    for t_index, t in enumerate(freshness_keys[:-1]):
-                                        if time_delta >= t and time_delta < freshness_keys[t_index+1]:
-                                            f = freshness.get(t)
-                                            break
-                                        elif t == freshness_keys[-2]:
-                                            f = 1.
-                                            break
+                                for t_index, t in enumerate(freshness_keys[:-1]):
+                                    if time_delta >= t and time_delta < freshness_keys[t_index+1]:
+                                        f = freshness.get(t)
+                                        break
+                                    elif t == freshness_keys[-2]:
+                                        f = 1.
+                                        break
                                 p *= exactness*(1-coverage)*f
                             else:
                                 continue
@@ -125,7 +122,7 @@ def get_life_span(observed, cef_measures):
                             if observed_val == v:
                                 time_delta = tu - tr
                                 if len(freshness) == 1:
-                                    f = 0.0
+                                    f = freshness[freshness_keys[0]]
                                 else:
                                     for t_index, t in enumerate(freshness_keys[:-1]):
                                         if time_delta >= t and time_delta < freshness_keys[t_index+1]:
