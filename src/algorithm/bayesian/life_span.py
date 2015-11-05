@@ -57,7 +57,7 @@ def get_life_span(observed, cef_measures):
 
     tr_last = start_time
     tr_last_index = 0
-    while tr_last < observation_time[-2]:
+    while tr_last < observation_time[-1]:
         likelihood = {}
         p_no_transition = 1.
         potential_values = []
@@ -74,7 +74,7 @@ def get_life_span(observed, cef_measures):
                 potential_values.remove(life_span_pre_val)
         if len(potential_values) == 0:
             break
-        for tr_index, tr in enumerate(observation_time[tr_last_index+1:observation_len-1]):
+        for tr_index, tr in enumerate(observation_time[tr_last_index+1:observation_len]):
             tr_index += tr_last_index+1
             for v in potential_values:
                 p = 1
