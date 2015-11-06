@@ -4,34 +4,6 @@ import datetime
 
 observed_cases = [
     # case 0 from article
-    # normalization
-    {
-        'S1': [['2000-01-01 00:00:00', '2001-01-01 00:00:00', '2002-01-01 00:00:00',
-                '2003-01-01 00:00:00', '2004-01-01 00:00:00', '2005-01-01 00:00:00',
-                '2006-01-01 00:00:00', '2007-01-01 00:00:00', '2008-01-01 00:00:00',
-                '2009-01-01 00:00:00'],
-               ['UCB', 'MIT', 'UCB', 'MIT', 'UCB', 'MIT', 'UCB', 'MIT', 'UCB', 'MIT']],
-        'S2': [['2000-01-01 00:00:00', '2001-01-01 00:00:00', '2002-01-01 00:00:00',
-                '2003-01-01 00:00:00', '2004-01-01 00:00:00', '2005-01-01 00:00:00',
-                '2006-01-01 00:00:00', '2007-01-01 00:00:00', '2008-01-01 00:00:00',
-                '2009-01-01 00:00:00'],
-               ['UCB', 'MIT', 'UCB', 'MIT', 'UCB', 'MIT', 'UCB', 'MIT', 'UCB', 'MIT']],
-        'S3': [['2000-01-01 00:00:00', '2001-01-01 00:00:00', '2002-01-01 00:00:00',
-                '2003-01-01 00:00:00', '2004-01-01 00:00:00', '2005-01-01 00:00:00',
-                '2006-01-01 00:00:00', '2007-01-01 00:00:00', '2008-01-01 00:00:00',
-                '2009-01-01 00:00:00'],
-               ['UCB', 'MIT', 'UCB', 'MIT', 'UCB', 'MIT', 'UCB', 'MIT', 'UCB', 'MIT']],
-        'S4': [['2000-01-01 00:00:00', '2001-01-01 00:00:00', '2002-01-01 00:00:00',
-                '2003-01-01 00:00:00', '2004-01-01 00:00:00', '2005-01-01 00:00:00',
-                '2006-01-01 00:00:00', '2007-01-01 00:00:00', '2008-01-01 00:00:00',
-                '2009-01-01 00:00:00'],
-               ['UCB', 'MIT', 'UCB', 'MIT', 'UCB', 'MIT', 'UCB', 'MIT', 'UCB', 'MIT']],
-        'S5': [['2000-01-01 00:00:00', '2001-01-01 00:00:00', '2002-01-01 00:00:00',
-                '2003-01-01 00:00:00', '2004-01-01 00:00:00', '2005-01-01 00:00:00',
-                '2006-01-01 00:00:00', '2007-01-01 00:00:00', '2008-01-01 00:00:00',
-                '2009-01-01 00:00:00'],
-               ['UCB', 'MIT', 'UCB', 'MIT', 'UCB', 'MIT', 'UCB', 'MIT', 'UCB', 'MIT']]
-    },
     {
         'S1': [['2003-01-01 00:00:00'],
                ['MIT']],
@@ -184,13 +156,21 @@ observed_cases = [
 
 def get_observed_cases():
     observed_cases_new = []
+    time_for_norm_obj = []
     for case in observed_cases:
         case_new = {}
         for s in case:
             t_new = []
             for t in case.get(s)[0]:
                 t_new.append(datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S'))
+                time_for_norm_obj.append(datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S'))
             case_new.update({s: [t_new, case.get(s)[1]]})
         observed_cases_new.append(case_new)
 
-    return observed_cases_new
+    time_for_norm_obj = sorted(list(set(time_for_norm_obj)))
+    values_for_norm_obj = ['Test_{}'.format(index) for index in range(len(time_for_norm_obj))]
+    normalizing_object = {}
+    for s in sorted(observed_cases[0].keys()):
+        normalizing_object.update({s: [time_for_norm_obj, values_for_norm_obj]})
+
+    return [normalizing_object] + observed_cases_new
