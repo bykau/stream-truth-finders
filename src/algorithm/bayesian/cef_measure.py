@@ -44,8 +44,8 @@ def get_CEF(life_span_set, sources_data):
                 elif O[i+1] != S[i+1]:
                     m += 1
 
-            # if O[i] == S[i] and O[i+1] != S[i+1]:
-            #     m += 1
+            if O[i] == S[i] and O[i+1] != S[i+1]:
+                m += 1
         if O[0] != S[0]:
             cl += 1
             ml += 1
