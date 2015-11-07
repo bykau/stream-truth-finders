@@ -1,4 +1,5 @@
 import csv
+import datetime
 
 from cef_measure import get_CEF
 from life_span import get_life_span
@@ -84,6 +85,44 @@ if __name__ == '__main__':
             cef_for_csv += [round(cef[0], 3), round(cef[1], 3), f_for_print]
         data_for_csv.update({case_number: [headers, [0] + [life_span_to_csv] + cef_for_csv]})
     print '---------------------'
+
+
+
+    # set_of_life_spans = [[[datetime.datetime(2000, 1, 1, 0, 0),
+    #                                 datetime.datetime(2001, 1, 1, 0, 0),
+    #                                 datetime.datetime(2002, 1, 1, 0, 0),
+    #                                 datetime.datetime(2003, 1, 1, 0, 0),
+    #                                 datetime.datetime(2004, 1, 1, 0, 0),
+    #                                 datetime.datetime(2005, 1, 1, 0, 0),
+    #                                 datetime.datetime(2006, 1, 1, 0, 0),
+    #                                 datetime.datetime(2007, 1, 1, 0, 0),
+    #                                 datetime.datetime(2008, 1, 1, 0, 0),
+    #                                 datetime.datetime(2009, 1, 1, 0, 0)],
+    #                                ['Test_0',
+    #                                 'Test_1',
+    #                                 'Test_2',
+    #                                 'Test_3',
+    #                                 'Test_4',
+    #                                 'Test_5',
+    #                                 'Test_6',
+    #                                 'Test_7',
+    #                                 'Test_8',
+    #                                 'Test_9']],
+    #                       [[datetime.datetime.strptime('2000-01-01 00:00:00', '%Y-%m-%d %H:%M:%S'),
+    #                        datetime.datetime.strptime('2002-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')],
+    #                       ['UCB', 'MIT']],
+    #                      [[datetime.datetime.strptime('2000-01-01 00:00:00', '%Y-%m-%d %H:%M:%S'),
+    #                        datetime.datetime.strptime('2008-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')],
+    #                       ['Wisc', 'MSR']],
+    #                      [[datetime.datetime.strptime('2000-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')],
+    #                       ['MSR']],
+    #                      [[datetime.datetime.strptime('2000-01-01 00:00:00', '%Y-%m-%d %H:%M:%S'),
+    #                        datetime.datetime.strptime('2002-01-01 00:00:00', '%Y-%m-%d %H:%M:%S'),
+    #                        datetime.datetime.strptime('2008-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')],
+    #                       ['Propel', 'BEA', 'UCI']],
+    #                      [[datetime.datetime.strptime('2000-01-01 00:00:00', '%Y-%m-%d %H:%M:%S'),
+    #                        datetime.datetime.strptime('2005-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')],
+    #                       ['UW', 'Google']]]
 
     cef_for_each_s_old = [cef_measures.get(s) for s in observed_keys]
     ce_delta_sum = [1, 1]
