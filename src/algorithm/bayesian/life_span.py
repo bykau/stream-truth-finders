@@ -19,10 +19,10 @@ def get_initial_value(observed, cef_measures):
     if None in all_possible_values:
         all_possible_values.remove(None)
     likelihood = {}
+    m = len(all_possible_values)-1
     for value in initial_values:
         p = 1
         for s in observed_keys:
-            m = len(all_possible_values)-1
             observed_value = observed.get(s)[1][0]
             coverage = cef_measures.get(s)[0]
             exactness = cef_measures.get(s)[1]
