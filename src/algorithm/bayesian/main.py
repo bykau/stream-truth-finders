@@ -1,3 +1,11 @@
+'''
+The implementation of Bayesian Model for streaming data truth detection presented in
+Xin Luna Dong, Laure Berti-Equille, Divesh Srivastava, (2012)
+Truth Discovery and Copying Detection in a Dynamic World, http://www.vldb.org/pvldb/2/vldb09-335.pdf
+
+@author: Evgeny Krivosheev (krivosheevevgeny@gmail.com)
+'''
+
 import csv
 import datetime
 
