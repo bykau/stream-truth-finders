@@ -56,3 +56,6 @@ for i in range(number_of_object):
                     continue
         obj.update({'S{}'.format(s): [t, v]})
     observed_cases.append(obj)
+
+with open('data.py', 'w') as f:
+    f.write('observed_cases = ' + str(observed_cases))
