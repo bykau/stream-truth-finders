@@ -1,6 +1,8 @@
 import random
 import string
+import math
 from datetime import datetime
+import numpy as np
 
 
 time_points = ['2000-01-01 00:00:00', '2000-01-05 00:00:00', '2000-01-07 00:00:00',
@@ -28,33 +30,27 @@ p_e = 0.2
 p_o = 0.3
 
 p_t = 0.75
-p_f = 0.99
-f0 = 0.1
+f0 = 0.3
 
 number_of_sources = 10
 observed_cases = []
 for i in range(number_of_object):
     obj = {}
     gt_time_points = ground_truth_list[i][0]
+    gt_values = ground_truth_list[i][1]
     for s in range(number_of_sources):
         t = []
         v = []
         for t_index, t_point in enumerate(time_points):
             x = random.random()
             if t_index == 0:
-                if x <= p_i:
-                    t.append(t_point)
-                else:
+                if x > p_i:
                     continue
             elif t_index == 19:
-                if x <= p_e:
-                    t.append(t_point)
-                else:
+                if x > p_e:
                     continue
             else:
-                if x <= p_o:
-                    t.append(t_point)
-                else:
+                if x > p_o:
                     continue
 
             for t_gt_index, t_gt in enumerate(gt_time_points):
@@ -67,14 +63,33 @@ for i in range(number_of_object):
                 elif len(gt_time_points) == 1:
                     t_gt_point = t_gt
                     break
-                else:
+                elif t_gt_index == len(gt_time_points)-1:
                     t_gt_point = t_gt
                     break
 
             delta = datetime.strptime(t_point, '%Y-%m-%d %H:%M:%S') - datetime.strptime(t_gt_point, '%Y-%m-%d %H:%M:%S')
             normz_factor = datetime.strptime(time_points[-1], '%Y-%m-%d %H:%M:%S') - datetime.strptime(time_points[0], '%Y-%m-%d %H:%M:%S')
-            delata_normalized = delta.total_seconds()/normz_factor.total_seconds()
+            delta_normalized = delta.total_seconds()/normz_factor.total_seconds()
+            if delta_normalized <= -math.log10(f0):
+                p_t_observ = p_t*f0*math.pow(2, delta_normalized)
+            else:
+                p_t_observ = p_t
+            gt_prev_val = gt_values[t_gt_index]
 
+            if np.random.choice(2, 1, p=[1-p_t_observ, p_t_observ])[0]:
+                if len(v) != 0 and gt_prev_val == v[-1]:
+                    continue
+                else:
+                    v.append(gt_prev_val)
+            else:
+                if len(v) != 0:
+                    v.append(random.choice(string.ascii_uppercase
+                                           .replace(gt_prev_val, '')
+                                           .replace(v[-1], '')))
+                else:
+                    v.append(random.choice(string.ascii_uppercase
+                                           .replace(gt_prev_val, '')))
+            t.append(t_point)
         obj.update({'S{}'.format(s): [t, v]})
     observed_cases.append(obj)
 
