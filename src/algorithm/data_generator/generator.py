@@ -57,15 +57,19 @@ for i in range(number_of_object):
                 for t_gt_index, t_gt in enumerate(gt_time_points):
                     if t_gt > t_point:
                         t_gt_point = gt_time_points[t_gt_index-1]
+                        gt_prev_val = gt_values[t_gt_index-1]
                         break
                     elif t_gt == t_point:
                         t_gt_point = t_gt
+                        gt_prev_val = gt_values[t_gt_index]
                         break
                     elif len(gt_time_points) == 1:
                         t_gt_point = t_gt
+                        gt_prev_val = gt_values[t_gt_index]
                         break
                     elif t_gt_index == len(gt_time_points)-1:
                         t_gt_point = t_gt
+                        gt_prev_val = gt_values[t_gt_index]
                         break
 
                 delta = datetime.strptime(t_point, '%Y-%m-%d %H:%M:%S') - datetime.strptime(t_gt_point, '%Y-%m-%d %H:%M:%S')
@@ -75,7 +79,6 @@ for i in range(number_of_object):
                     p_t_observ = p_t*f0*math.pow(2, delta_normalized)
                 else:
                     p_t_observ = p_t
-                gt_prev_val = gt_values[t_gt_index]
 
                 if np.random.choice(2, 1, p=[1-p_t_observ, p_t_observ])[0]:
                     if len(v) != 0 and gt_prev_val == v[-1]:
