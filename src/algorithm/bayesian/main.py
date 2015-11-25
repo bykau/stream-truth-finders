@@ -83,7 +83,7 @@ if __name__ == '__main__':
     raw_cases = get_observed_cases()
     observed_cases = cook_raw_value(raw_cases)
     observed_keys = sorted(observed_cases[0].keys())
-    cef_measures = cef_initialization(c=0.8, e=0.9, observed=observed_cases[0])
+    cef_measures = cef_initialization(c=0.7, e=0.7, observed=observed_cases[0])
     set_of_life_spans = []
     sources_number = len(observed_keys)
     cases_number = len(observed_cases)
@@ -123,7 +123,7 @@ if __name__ == '__main__':
 
     cef_for_each_s_old = [cef_measures.get(s) for s in observed_keys]
     ce_delta_sum = [1, 1]
-    while max(ce_delta_sum) > 0.00001*sources_number*cases_number:
+    while max(ce_delta_sum) > 0.0001*sources_number*cases_number:
         cef_for_each_s = []
         observed_cases_changed = [] + observed_cases
         for observed_case_index in range(cases_number):
@@ -170,8 +170,10 @@ if __name__ == '__main__':
             list_to_print = []
             for t, val in zip(life_span[0], life_span[1]):
                 list_to_print.append([t.strftime('%Y-%m-%d'), val])
+            print '---------------------'
             print "Object {}, dist: {}%, life span: {}".format(case_index, distance_to_gt[case_index], list_to_print)
-            list_to_csv = [] + ['{}, {}%'.format(str(iter_quantity), distance_to_gt[case_index])]    + [str(list_to_print)] + cef_for_csv
+            print "Gtound Truth:                    {}".format([[tm, vl] for tm, vl in zip(ground_truth_list[case_index][0], ground_truth_list[case_index][1])])
+            list_to_csv = [] + ['{}, {}%'.format(str(iter_quantity), distance_to_gt[case_index])] + [str(list_to_print)] + cef_for_csv
             data = data_for_csv[case_index] + [list_to_csv]
             data_for_csv.update({case_index: data})
         # print 'Majority voting results: {} {}%' \
