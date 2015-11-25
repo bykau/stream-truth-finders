@@ -12,17 +12,31 @@ from cef_measure import get_CEF
 from life_span import get_life_span
 from algorithm_competitors import majority_voting
 from raw_value_preparation import cook_raw_value
-from datetime import timedelta
-from src.algorithm.data_generator import get_observed_cases
+from datetime import timedelta, datetime
+from src.algorithm.data_generator import get_observed_cases, ground_truth_list
 
 
-def get_truth_overlap(truth, result):
-    k = 0
-    for index, value in enumerate(result):
-        if value == truth[index]:
-            k += 1
+def get_truth_overlap(truth_list, result_list):
+    combained_values = []
+    for truth, result in zip(truth_list, result_list):
+        t_truth = [datetime.strptime(truth_point, '%Y-%m-%d %H:%M:%S') for truth_point in truth[0]]
+        dict_item = {'GT': [t_truth, truth[1]],
+                     'LS': result}
+        combained_values.append(dict_item)
+    combained_values = cook_raw_value(combained_values)
 
-    return 100*k/len(truth)
+    distance_to_gt = []
+    for obj_item in combained_values:
+        k = 0
+        gt = obj_item.get('GT')[1]
+        ls = obj_item.get('LS')[1]
+        for truth, result in zip(gt, ls):
+            if truth == result:
+                k += 1
+        dist = 100*k/len(gt)
+        distance_to_gt.append(dist)
+
+    return distance_to_gt
 
 
 def cef_initialization(c, e, observed):
@@ -97,7 +111,7 @@ if __name__ == '__main__':
         data_for_csv.update({case_number: [headers, [0] + [life_span_to_csv] + cef_for_csv]})
     print '---------------------'
 
-    # for testing cef measures
+    # # for testing cef measures
     # from src.algorithm.data_generator.data import ground_truth_list
     # import datetime
     # set_of_life_spans = [set_of_life_spans[0]]
@@ -109,7 +123,7 @@ if __name__ == '__main__':
 
     cef_for_each_s_old = [cef_measures.get(s) for s in observed_keys]
     ce_delta_sum = [1, 1]
-    while max(ce_delta_sum) > 0.000001*sources_number*cases_number:
+    while max(ce_delta_sum) > 0.00001*sources_number*cases_number:
         cef_for_each_s = []
         observed_cases_changed = [] + observed_cases
         for observed_case_index in range(cases_number):
@@ -141,6 +155,7 @@ if __name__ == '__main__':
                 ce_delta_sum[i] += diff_for_s[i]
         cef_for_each_s_old = cef_for_each_s
         # majority_voting_result = majority_voting(observed)
+        distance_to_gt = get_truth_overlap(ground_truth_list, set_of_life_spans[1:])
 
         iter_quantity += 1
         print '---------------------'
@@ -151,12 +166,12 @@ if __name__ == '__main__':
             print s, ': C={}, E={}, F={}'.format(cef[0], cef[1], cef[2])
             f_for_print = ['{}: {}'.format(t.days, cef[2][t]) for t in sorted(cef[2].keys())]
             cef_for_csv += [round(cef[0], 3), round(cef[1], 3), f_for_print]
-        for case_index, life_span in enumerate(set_of_life_spans):
+        for case_index, life_span in enumerate(set_of_life_spans[1:]):
             list_to_print = []
             for t, val in zip(life_span[0], life_span[1]):
                 list_to_print.append([t.strftime('%Y-%m-%d'), val])
-            print "Object {} life span: {}".format(case_index, list_to_print)
-            list_to_csv = [] + [str(iter_quantity)] + [str(list_to_print)] + cef_for_csv
+            print "Object {}, dist: {}%, life span: {}".format(case_index, distance_to_gt[case_index], list_to_print)
+            list_to_csv = [] + ['{}, {}%'.format(str(iter_quantity), distance_to_gt[case_index])]    + [str(list_to_print)] + cef_for_csv
             data = data_for_csv[case_index] + [list_to_csv]
             data_for_csv.update({case_index: data})
         # print 'Majority voting results: {} {}%' \
