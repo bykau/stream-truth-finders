@@ -13,7 +13,7 @@ time_points = ['2000-01-01 00:00:00', '2000-01-05 00:00:00', '2000-01-07 00:00:0
                '2000-02-19 00:00:00', '2000-02-23 00:00:00', '2000-02-25 00:00:00',
                '2000-02-27 00:00:00', '2000-02-28 00:00:00']
 
-number_of_object = 30
+number_of_object = 100
 ground_truth_list = []
 for i in range(number_of_object):
     t = [time_points[0]]
@@ -25,14 +25,14 @@ for i in range(number_of_object):
     ground_truth_list.append([sorted(t), v])
 
 
-p_i = 0.5
-p_e = 0.2
-p_o = 0.3
+p_i = 0.9
+p_e = 0.8
+p_o = 0.5
 
-number_of_sources = 10
+number_of_sources = 5
 parameters_for_s = []
 for s in range(number_of_sources):
-    p_t = np.random.normal(0.98, 0.003, 1)[0]
+    p_t = np.random.normal(0.7, 0.1, 1)[0]
     f0 = np.random.normal(0.98, 0.003, 1)[0]
     parameters_for_s.append([p_t, f0])
 

@@ -8,7 +8,6 @@ Truth Discovery and Copying Detection in a Dynamic World, http://www.vldb.org/pv
 
 import csv
 import datetime
-# import matplotlib.pyplot as plt
 
 from cef_measure import get_CEF
 from life_span import get_life_span
@@ -97,7 +96,6 @@ if __name__ == '__main__':
 
         # print initial info
         print 'OBJECT NUMBER: {}'.format(case_number)
-        # print 'Ground truth: {}'.format(ground_truth)
         for key in observed_keys:
             print '{}: {}'.format(key, observed.get(key)[1])
         print 'Initial life span: {}'.format(life_span)
@@ -181,14 +179,9 @@ if __name__ == '__main__':
             list_to_csv = [] + ['{}, {}%'.format(str(iter_quantity), distance_to_gt[case_index])] + [str(list_to_print)] + cef_for_csv
             data = data_for_csv[case_index] + [list_to_csv]
             data_for_csv.update({case_index: data})
-        # print 'Majority voting results: {} {}%' \
-        #     .format(majority_voting_result, get_truth_overlap(ground_truth, majority_voting_result))
 
     print 'iter_quantity={}'.format(iter_quantity)
     print "*********************************************************"
-
-    # plt.bar(range(100), distance_to_gt)
-    # plt.show()
 
     # objects_names = ['Normalization', 'Stonebraker', 'Dewitt', 'Bernstein', 'Carey', 'Halevy']
     with open('output_data.csv', 'w') as result_file:
