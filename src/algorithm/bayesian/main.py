@@ -7,19 +7,20 @@ Truth Discovery and Copying Detection in a Dynamic World, http://www.vldb.org/pv
 '''
 
 import csv
+import datetime
+# import matplotlib.pyplot as plt
 
 from cef_measure import get_CEF
 from life_span import get_life_span
 from algorithm_competitors import majority_voting
 from raw_value_preparation import cook_raw_value
-from datetime import timedelta, datetime
 from src.algorithm.data_generator import get_observed_cases, ground_truth_list
 
 
 def get_truth_overlap(truth_list, result_list):
     combained_values = []
     for truth, result in zip(truth_list, result_list):
-        t_truth = [datetime.strptime(truth_point, '%Y-%m-%d %H:%M:%S') for truth_point in truth[0]]
+        t_truth = [datetime.datetime.strptime(truth_point, '%Y-%m-%d %H:%M:%S') for truth_point in truth[0]]
         dict_item = {'GT': [t_truth, truth[1]],
                      'LS': result}
         combained_values.append(dict_item)
@@ -44,7 +45,7 @@ def cef_initialization(c, e, observed):
     cef_measures = {}
     f_init = {}
     time_observation = observed.get(observed_keys[0])[0]
-    delta_max = timedelta(seconds=0)
+    delta_max = datetime.timedelta(seconds=0)
     for t_index, t in enumerate(observed.get(observed_keys[0])[0][:-1]):
         delta = time_observation[t_index+1]-t
         if delta > delta_max:
@@ -52,7 +53,7 @@ def cef_initialization(c, e, observed):
     f_item = 1./6
     t_item = delta_max/5
     f = f_item
-    delta = timedelta(seconds=0)
+    delta = datetime.timedelta(seconds=0)
     while delta <= delta_max:
         f_init.update({delta: f})
         f += f_item
@@ -154,9 +155,11 @@ if __name__ == '__main__':
             for i in range(len(ce_delta_sum)):
                 ce_delta_sum[i] += diff_for_s[i]
         cef_for_each_s_old = cef_for_each_s
-        # majority_voting_result = majority_voting(observed)
+        majority_voting_result = majority_voting(observed_cases_changed)
         distance_to_gt = get_truth_overlap(ground_truth_list, set_of_life_spans[1:])
+        distance_to_gt_mv = get_truth_overlap(ground_truth_list, majority_voting_result[1:])
 
+        # from src.algorithm.data_generator.data import observed_cases as print_cases
         iter_quantity += 1
         print '---------------------'
         print 'round={}'.format(iter_quantity)
@@ -171,8 +174,10 @@ if __name__ == '__main__':
             for t, val in zip(life_span[0], life_span[1]):
                 list_to_print.append([t.strftime('%Y-%m-%d'), val])
             print '---------------------'
-            print "Object {}, dist: {}%, life span: {}".format(case_index, distance_to_gt[case_index], list_to_print)
-            print "Gtound Truth:                    {}".format([[tm, vl] for tm, vl in zip(ground_truth_list[case_index][0], ground_truth_list[case_index][1])])
+            print "Object {}, dist: {}%, dist_mv: {}% life span: {}".format(case_index, distance_to_gt[case_index],
+                                                                            distance_to_gt_mv[case_index], list_to_print)
+            # print "Gtound Truth:                    {}".format([[tm[0:10], vl] for tm, vl in zip(ground_truth_list[case_index][0], ground_truth_list[case_index][1])])
+            # print print_cases[case_index]
             list_to_csv = [] + ['{}, {}%'.format(str(iter_quantity), distance_to_gt[case_index])] + [str(list_to_print)] + cef_for_csv
             data = data_for_csv[case_index] + [list_to_csv]
             data_for_csv.update({case_index: data})
@@ -181,6 +186,9 @@ if __name__ == '__main__':
 
     print 'iter_quantity={}'.format(iter_quantity)
     print "*********************************************************"
+
+    # plt.bar(range(100), distance_to_gt)
+    # plt.show()
 
     # objects_names = ['Normalization', 'Stonebraker', 'Dewitt', 'Bernstein', 'Carey', 'Halevy']
     with open('output_data.csv', 'w') as result_file:
