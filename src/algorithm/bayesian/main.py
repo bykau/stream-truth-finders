@@ -13,30 +13,8 @@ from cef_measure import get_CEF
 from life_span import get_life_span
 from algorithm_competitors import majority_voting
 from raw_value_preparation import cook_raw_value
+from evaluation_methods import get_truth_overlap
 from src.algorithm.data_generator import get_observed_cases, ground_truth_list
-
-
-def get_truth_overlap(truth_list, result_list):
-    combained_values = []
-    for truth, result in zip(truth_list, result_list):
-        t_truth = [datetime.datetime.strptime(truth_point, '%Y-%m-%d %H:%M:%S') for truth_point in truth[0]]
-        dict_item = {'GT': [t_truth, truth[1]],
-                     'LS': result}
-        combained_values.append(dict_item)
-    combained_values = cook_raw_value(combained_values)
-
-    distance_to_gt = []
-    for obj_item in combained_values:
-        k = 0
-        gt = obj_item.get('GT')[1]
-        ls = obj_item.get('LS')[1]
-        for truth, result in zip(gt, ls):
-            if truth == result:
-                k += 1
-        dist = 100*k/len(gt)
-        distance_to_gt.append(dist)
-
-    return distance_to_gt
 
 
 def cef_initialization(c, e, observed):
