@@ -51,4 +51,3 @@ def get_levenshtein_distance(truth_list, result_list):
         levenshtein_distance.append(dist[len_gt][len_ls])
 
     return levenshtein_distance
-
