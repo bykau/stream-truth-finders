@@ -13,7 +13,7 @@ from cef_measure import get_CEF
 from life_span import get_life_span
 from algorithm_competitors import majority_voting
 from raw_value_preparation import cook_raw_value
-from evaluation_methods import get_truth_overlap
+from evaluation_methods import get_truth_overlap, get_levenshtein_distance
 from src.algorithm.data_generator import get_observed_cases, ground_truth_list
 
 
@@ -132,8 +132,11 @@ if __name__ == '__main__':
                 ce_delta_sum[i] += diff_for_s[i]
         cef_for_each_s_old = cef_for_each_s
         majority_voting_result = majority_voting(observed_cases_changed)
-        distance_to_gt = get_truth_overlap(ground_truth_list, set_of_life_spans[1:])
-        distance_to_gt_mv = get_truth_overlap(ground_truth_list, majority_voting_result[1:])
+        levenshtein_distance = get_levenshtein_distance(ground_truth_list, set_of_life_spans[1:])
+        levenshtein_distance_m_voting = get_levenshtein_distance(ground_truth_list, majority_voting_result[1:])
+
+        # distance_to_gt = get_truth_overlap(ground_truth_list, set_of_life_spans[1:])
+        # distance_to_gt_mv = get_truth_overlap(ground_truth_list, majority_voting_result[1:])
 
         # from src.algorithm.data_generator.data import observed_cases as print_cases
         iter_quantity += 1
@@ -150,11 +153,11 @@ if __name__ == '__main__':
             for t, val in zip(life_span[0], life_span[1]):
                 list_to_print.append([t.strftime('%Y-%m-%d'), val])
             print '---------------------'
-            print "Object {}, dist: {}%, dist_mv: {}% life span: {}".format(case_index, distance_to_gt[case_index],
-                                                                            distance_to_gt_mv[case_index], list_to_print)
+            print "Object {}, ed.dist={}, ed.dist_mv={} life span: {}".format(case_index, levenshtein_distance[case_index],
+                                                                            levenshtein_distance_m_voting[case_index], list_to_print)
             # print "Gtound Truth:                    {}".format([[tm[0:10], vl] for tm, vl in zip(ground_truth_list[case_index][0], ground_truth_list[case_index][1])])
             # print print_cases[case_index]
-            list_to_csv = [] + ['{}, {}%'.format(str(iter_quantity), distance_to_gt[case_index])] + [str(list_to_print)] + cef_for_csv
+            list_to_csv = [] + ['{}, {}'.format(str(iter_quantity), levenshtein_distance[case_index])] + [str(list_to_print)] + cef_for_csv
             data = data_for_csv[case_index] + [list_to_csv]
             data_for_csv.update({case_index: data})
 
