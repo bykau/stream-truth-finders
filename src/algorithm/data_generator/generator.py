@@ -1,3 +1,4 @@
+import sys
 import random
 import string
 import math
@@ -35,11 +36,19 @@ def get_ground_truth(number_of_object):
     return ground_truth_list
 
 
-def get_s_parameters():
+def get_s_parameters(p_t_mean, f0_mean):
     parameters_for_s = []
     for s in range(number_of_sources):
-        p_t = np.random.normal(0.4, 0.1, 1)[0]
-        f0 = np.random.normal(0.7, 0.1, 1)[0]
+        p_t = np.random.normal(p_t_mean, 0.1, 1)[0]
+        if p_t < 0:
+            p_t = 0.1
+        elif p_t > 1:
+            p_t = 1.
+        f0 = np.random.normal(f0_mean, 0.1, 1)[0]
+        if f0 < 0:
+            f0 = 0.1
+        elif f0 > 1:
+            f0 = 1.
         parameters_for_s.append([p_t, f0])
 
     return parameters_for_s
@@ -115,8 +124,14 @@ def get_observed_cases(ground_truth_list, parameters_for_s):
 
 
 if __name__ == '__main__':
+    args = sys.argv[1:]
+    if len(args) != 2:
+        print '** Parameters error **'
+        sys.exit(1)
+    p_t = args[0]
+    f0 = args[1]
     ground_truth_list = get_ground_truth(number_of_object)
-    parameters_for_s = get_s_parameters()
+    parameters_for_s = get_s_parameters(p_t, f0)
     observed_cases = get_observed_cases(ground_truth_list, parameters_for_s)
 
     with open('data.py', 'w') as f:
