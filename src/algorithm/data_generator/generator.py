@@ -14,7 +14,7 @@ time_points = ['2000-01-01 00:00:00', '2000-01-05 00:00:00', '2000-01-07 00:00:0
                '2000-02-19 00:00:00', '2000-02-23 00:00:00', '2000-02-25 00:00:00',
                '2000-02-27 00:00:00', '2000-02-28 00:00:00']
 
-p_i = 0.5
+p_i = 0.7
 p_e = 0.1
 p_o = 0.1
 
@@ -27,7 +27,8 @@ def get_ground_truth(number_of_object):
     for i in range(number_of_object):
         t = [time_points[0]]
         v = [random.choice(string.ascii_uppercase)]
-        number_of_v = random.choice(range(len(time_points)/6))
+        # number_of_v = random.choice(range(len(time_points)/6))
+        number_of_v = random.choice([1, 2])
         for j in range(number_of_v):
             t.append(random.choice(list(set(time_points)-set(t))))
             v.append(random.choice(string.ascii_uppercase.replace(v[-1], '')))
@@ -41,7 +42,7 @@ def get_s_parameters(p_t_mean, f0_mean):
     for s in range(number_of_sources):
         p_t = np.random.normal(p_t_mean, 0.1, 1)[0]
         if p_t < 0:
-            p_t = 0.1
+            p_t = 0.01
         elif p_t > 1:
             p_t = 1.
         f0 = np.random.normal(f0_mean, 0.1, 1)[0]
@@ -137,3 +138,5 @@ if __name__ == '__main__':
     with open('data.py', 'w') as f:
         f.write('ground_truth_list = ' + str(ground_truth_list) + '\n')
         f.write('observed_cases = ' + str(observed_cases) + '\n')
+        f.write('p_t_mean = {}'.format(f0) + '\n')
+        f.write('f0_mean = {}'.format(f0) + '\n')
