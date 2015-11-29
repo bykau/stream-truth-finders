@@ -6,6 +6,7 @@ Truth Discovery and Copying Detection in a Dynamic World, http://www.vldb.org/pv
 @author: Evgeny Krivosheev (krivosheevevgeny@gmail.com)
 '''
 
+import os
 import csv
 import datetime
 import numpy as np
@@ -43,19 +44,19 @@ def cef_initialization(c, e, observed):
 
     return cef_measures
 
+headers = ['Round', 'Life span',
+            'S1.C', 'S1.E', 'S1.F, days',
+            'S2.C', 'S2.E', 'S2.F, days',
+            'S3.C', 'S3.E', 'S3.F, days',
+            'S4.C', 'S4.E', 'S4.F, days',
+            'S5.C', 'S5.E', 'S5.F, days',
+            'S6.C', 'S6.E', 'S6.F, days',
+            'S7.C', 'S7.E', 'S7.F, days',
+            'S8.C', 'S8.E', 'S8.F, days',
+            'S9.C', 'S9.E', 'S9.F, days',
+            'S10.C', 'S10.E', 'S10.F, days']
 
 if __name__ == '__main__':
-    headers = ['Round', 'Life span',
-                'S1.C', 'S1.E', 'S1.F, days',
-                'S2.C', 'S2.E', 'S2.F, days',
-                'S3.C', 'S3.E', 'S3.F, days',
-                'S4.C', 'S4.E', 'S4.F, days',
-                'S5.C', 'S5.E', 'S5.F, days',
-                'S6.C', 'S6.E', 'S6.F, days',
-                'S7.C', 'S7.E', 'S7.F, days',
-                'S8.C', 'S8.E', 'S8.F, days',
-                'S9.C', 'S9.E', 'S9.F, days',
-                'S10.C', 'S10.E', 'S10.F, days']
     raw_cases = get_observed_cases()
     observed_cases = cook_raw_value(raw_cases)
     observed_keys = sorted(observed_cases[0].keys())
@@ -169,9 +170,18 @@ if __name__ == '__main__':
     print 'iter_quantity={}'.format(iter_quantity)
     print "*********************************************************"
 
-    # objects_names = ['Normalization', 'Stonebraker', 'Dewitt', 'Bernstein', 'Carey', 'Halevy']
     with open('output_data.csv', 'w') as result_file:
         wr = csv.writer(result_file,  dialect='excel')
-        # for obj, name in zip(data_for_csv, objects_names):
         for obj, name in zip(data_for_csv, range(len(observed_cases))):
                 wr.writerows([['Object {}'.format(name)]] + data_for_csv[obj] + [''] + [''])
+
+    headers_statistics = ['p_t mean', 'f0 mean', 'edit dist', 'edit std',
+                          'edit dist mv', 'edit std mv']
+    stat_list = [p_t_mean, f0_mean, round(np.mean(levenshtein_distance), 2), round(np.std(levenshtein_distance), 2),
+                 round(np.mean(levenshtein_distance_m_voting), 2), round(np.std(levenshtein_distance_m_voting), 2)]
+    with open('statistics_data.csv', 'a') as stats_file:
+        wr = csv.writer(stats_file,  dialect='excel')
+        if os.stat("statistics_data.csv").st_size == 0:
+            wr.writerows([headers_statistics, stat_list])
+        else:
+            wr.writerows([stat_list])
