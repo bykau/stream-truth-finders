@@ -175,10 +175,18 @@ if __name__ == '__main__':
         for obj, name in zip(data_for_csv, range(len(observed_cases))):
                 wr.writerows([['Object {}'.format(name)]] + data_for_csv[obj] + [''] + [''])
 
+    cov_delta = []
+    exac_delta = []
+    for s in range(sources_number):
+        cov_delta.append(abs(cef_gt[s][0]-cef_for_each_s[s][0]))
+        exac_delta.append(abs(cef_gt[s][1]-cef_for_each_s[s][1]))
     headers_statistics = ['p_t mean', 'f0 mean', 'edit dist', 'edit std',
-                          'edit dist mv', 'edit std mv']
-    stat_list = [p_t_mean, f0_mean, round(np.mean(levenshtein_distance), 2), round(np.std(levenshtein_distance), 2),
-                 round(np.mean(levenshtein_distance_m_voting), 2), round(np.std(levenshtein_distance_m_voting), 2)]
+                          'edit dist mv', 'edit std mv', 'cov delta',
+                          'cov std', 'exac delta', 'exac std']
+    stat_list = [p_t_mean, f0_mean, round(np.mean(levenshtein_distance), 3), round(np.std(levenshtein_distance), 3),
+                 round(np.mean(levenshtein_distance_m_voting), 3), round(np.std(levenshtein_distance_m_voting), 3),
+                 round(np.mean(cov_delta), 3), round(np.std(cov_delta), 3),
+                 round(np.mean(exac_delta), 3), round(np.std(exac_delta), 3)]
     with open('statistics_data.csv', 'a') as stats_file:
         wr = csv.writer(stats_file,  dialect='excel')
         if os.stat("statistics_data.csv").st_size == 0:
