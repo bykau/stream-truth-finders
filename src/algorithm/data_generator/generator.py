@@ -135,8 +135,8 @@ if __name__ == '__main__':
     parameters_for_s = get_s_parameters(p_t, f0)
     observed_cases = get_observed_cases(ground_truth_list, parameters_for_s)
 
-    with open('data.py', 'w') as f:
+    with open('../data_generator/data.py', 'w') as f:
         f.write('ground_truth_list = ' + str(ground_truth_list) + '\n')
         f.write('observed_cases = ' + str(observed_cases) + '\n')
-        f.write('p_t_mean = {}'.format(f0) + '\n')
+        f.write('p_t_mean = {}'.format(p_t) + '\n')
         f.write('f0_mean = {}'.format(f0) + '\n')
