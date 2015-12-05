@@ -24,8 +24,11 @@ def get_initial_value(observed, cef_measures):
         p = 1
         for s in observed_keys:
             observed_value = observed.get(s)[1][0]
-            coverage = cef_measures.get(s)[0]
-            exactness = cef_measures.get(s)[1]
+            try:
+                coverage = cef_measures.get(s)[0]
+                exactness = cef_measures.get(s)[1]
+            except TypeError:
+                pass
 
             if observed_value == value:
                 if value:
