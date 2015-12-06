@@ -29,4 +29,4 @@ def get_game_cases():
     for s in football_sources:
         normalizing_object.update({s: [time_for_norm_obj, values_for_norm_obj]})
 
-    return [normalizing_object] + observed_cases_new, games_name_list
+    return observed_cases_new, games_name_list, football_sources
