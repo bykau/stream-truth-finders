@@ -47,7 +47,8 @@ def cef_initialization(c, e, observed, sources):
 
 
 if __name__ == '__main__':
-    raw_cases, game_name_list, observed_keys = get_game_cases()
+    normalizing_object, raw_cases, game_name_list, observed_keys = get_game_cases()
+    obj_norm_life_span = normalizing_object.values()[0]
     observed_cases = cook_raw_value(raw_cases)
     # observed_keys = sorted(['MenuPages', 'TasteSpace', 'NYMag', 'NYTimes', 'ActiveDiner', 'TimeOut',
     #                         'SavoryCities', 'VillageVoice', 'FoodBuzz', 'NewYork', 'OpenTable', 'DiningGuide'])
@@ -100,7 +101,9 @@ if __name__ == '__main__':
     ce_delta_sum = [1, 1]
     while max(ce_delta_sum) > 0.01*sources_number:
         cef_for_each_s = []
+        set_of_life_spans.append(obj_norm_life_span)
         observed_cases_changed = [] + observed_cases
+        observed_cases_changed.append(normalizing_object)
         for observed_case_index in range(cases_number):
             observed_cases_changed[observed_case_index].update({'life_span': set_of_life_spans[observed_case_index]})
         observed_cases_changed = cook_raw_value(observed_cases_changed)
@@ -114,12 +117,11 @@ if __name__ == '__main__':
                 if not s_data:
                     continue
                 sources_data.append(s_data)
-            if not sources_data:
-                pass
             cef = get_CEF(life_span_set=set_of_life_spans,
                           sources_data=sources_data)
             cef_measures.update({s: cef})
             cef_for_each_s.append(cef)
+        del observed_cases_changed[-1]
 
         set_of_life_spans = []
         for observed_changed in observed_cases_changed:
