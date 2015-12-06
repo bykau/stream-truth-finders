@@ -1,18 +1,45 @@
 import csv
 from collections import defaultdict
-import pandas as pd
-import datetime
 from dateutil import parser
 import numpy as np
+
 
 def get_score_sum(score):
     scores = score.replace('[','').replace(']','').replace('\'','').split(',')[0].split('-')
     return int(scores[0]) + int(scores[1])
-    
+
+
+def data_preparation(games):
+    games_name_list = []
+    obj_list = []
+    for game in games.keys():
+        obj = {}
+        for t in sorted(games[game], key=lambda tup: parser.parse(tup[2])):
+            s = t[0]
+            score_sum = get_score_sum(t[5])
+            time = t[2].replace('+0000', '')
+            obj_s_val = obj.get(s)
+            if obj_s_val:
+                if obj_s_val[1][-1] != score_sum:
+                    obj_s_val[0].append(time)
+                    obj_s_val[1].append(score_sum)
+                else:
+                    continue
+            else:
+                obj_s_val = [[time], [score_sum]]
+            obj.update({s: obj_s_val})
+
+        games_name_list.append(game)
+        obj_list.append(obj)
+
+    with open('data.py', 'w') as f:
+        f.write('games_name_list = ' + str(games_name_list) + '\n')
+        f.write('observed_cases = ' + str(obj_list) + '\n')
+
 
 if __name__ == '__main__':
     games = defaultdict(list)
-    with open('../data/data.txt') as data_file:
+    with open('../data_mining_twitter/data.txt') as data_file:
         data_reader = csv.reader(data_file, delimiter=';')
         for row in data_reader:
             if len(row) > 6:
@@ -53,4 +80,5 @@ if __name__ == '__main__':
     
     for source in delays.keys():
         print "{}\t{}\t{:.1f}\t{:.1f}".format(source, len(delays[source]), np.average(delays[source]), np.std(delays[source]))
-            
+
+    data_preparation(games)

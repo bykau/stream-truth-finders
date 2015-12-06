@@ -1,4 +1,3 @@
-user_id;tweets_id;date;text;link
 140464347;610153488950018048;Sun Jun 14 18:35:02 +0000 2015;Real;Liverpool;['4-2'];http://t.co/kFdKoW17Wa
 140464347;610121282621849600;Sun Jun 14 16:27:03 +0000 2015;Real;Liverpool;['2-0'];http://t.co/pgw6IM5oUp
 140464347;604736661134540800;Sat May 30 19:50:30 +0000 2015;Athletic;Barcelona;['0-0'];http://t.co/2BeBV6B3n8
@@ -960,9 +959,6 @@ user_id;tweets_id;date;text;link
 373024530;506102438491738113;Sun Aug 31 15:33:18 +0000 2014;Zenit;Lokomotiv;['0-1'];
 373024530;506102436277145600;Sun Aug 31 15:33:18 +0000 2014;Ruch;Lechia;['3-3'];
 373024530;506057063542181888;Sun Aug 31 12:33:00 +0000 2014;Liverpool;Tottenham;['0-0'];
-********* sleep 5 min *********
-********* sleep 5 min *********
-********* sleep 5 min *********
 373024530;505833746717609985;Sat Aug 30 21:45:37 +0000 2014;Real;Espanyol;['0-1'];
 373024530;505786431856336896;Sat Aug 30 18:37:37 +0000 2014;Toulouse;Evian;['0-0'];
 373024530;505703176998105088;Sat Aug 30 13:06:47 +0000 2014;Amkar;Spartak;['0-0'];
@@ -1541,4 +1537,3 @@ user_id;tweets_id;date;text;link
 2427161196;598590145252687873;Wed May 13 20:46:26 +0000 2015;Real;Juventus;['1-1'];http://t.co/7z…
 2427161196;598572491397799937;Wed May 13 19:36:17 +0000 2015;Real;Juventus;['1-0'];
 2427161196;598560606984216576;Wed May 13 18:49:04 +0000 2015;Real;Juventus;['0-0'];
-Done!
