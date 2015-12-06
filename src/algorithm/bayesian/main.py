@@ -99,7 +99,7 @@ if __name__ == '__main__':
 
     cef_for_each_s_old = [cef_measures.get(s) for s in observed_keys]
     ce_delta_sum = [1, 1]
-    while max(ce_delta_sum) > 0.01*sources_number:
+    while max(ce_delta_sum) > 0.001*sources_number:
         cef_for_each_s = []
         set_of_life_spans.append(obj_norm_life_span)
         observed_cases_changed = [] + observed_cases

@@ -144,6 +144,8 @@ def get_life_span(observed, cef_measures):
                                             break
                                 p *= exactness*coverage*f
                                 truth_numb += 1
+                                if len(observed_keys) == 1:
+                                    likelihood.update({0.99: [tr, v]})
                             else:
                                 p *= (1-exactness)*float((tu-tu_1).total_seconds()) \
                                      /(m*float((end_time-life_span_pre_time).total_seconds()))
