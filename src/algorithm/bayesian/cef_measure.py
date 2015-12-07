@@ -61,7 +61,10 @@ def get_CEF(life_span_set, sources_data):
 
     c = float(c)
     exac = 1 - float(m)/ml
-    covg = float(c)/cl
+    try:
+        covg = float(c)/cl
+    except ZeroDivisionError:
+        covg = 0.99
     delta_for_freshness = sorted(list(set(data_for_freshness)))
     fresh = {timedelta(seconds=0): 0.0}
     for delta in delta_for_freshness:
