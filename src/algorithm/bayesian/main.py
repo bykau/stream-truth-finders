@@ -122,14 +122,16 @@ if __name__ == '__main__':
 
         time_points = observed_cases_changed[0].get('life_span')[0]
         for s in observed_keys:
+            set_of_life_spans_for_s = []
             sources_data = []
             time_points = []
-            for case in raw_cases:
+            for case_index, case in enumerate(raw_cases):
                 s_data = case.get(s)
                 if not s_data:
                     continue
                 sources_data.append(s_data)
-            cef = get_CEF(life_span_set=set_of_life_spans,
+                set_of_life_spans_for_s.append(set_of_life_spans[case_index])
+            cef = get_CEF(life_span_set=set_of_life_spans_for_s,
                           sources_data=sources_data)
             cef_measures.update({s: cef})
             cef_for_each_s.append(cef)
