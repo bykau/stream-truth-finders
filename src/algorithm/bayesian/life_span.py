@@ -77,10 +77,16 @@ def get_life_span(observed, cef_measures):
                 potential_values.remove(life_span_pre_val)
         if len(potential_values) == 0:
             break
+        truth_numb = 0
         for tr_index, tr in enumerate(observation_time[tr_last_index+1:observation_len]):
             tr_index += tr_last_index+1
             for v in potential_values:
                 p = 1.
+                if truth_numb == len(observed_keys):
+                    truth_numb = 0
+                    likelihood.update({0.99: [tr, val]})
+                    break
+                val = v
                 for s in observed_keys:
                     coverage = cef_measures.get(s)[0]
                     exactness = cef_measures.get(s)[1]
@@ -119,6 +125,9 @@ def get_life_span(observed, cef_measures):
                                             f = 1.
                                             break
                                 p *= exactness*(1-coverage)*f
+                                truth_numb += 1
+                                if len(observed_keys) == 1:
+                                    likelihood.update({0.99: [tr, v]})
                             else:
                                 continue
                         else:
