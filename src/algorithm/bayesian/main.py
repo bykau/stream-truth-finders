@@ -162,6 +162,11 @@ if __name__ == '__main__':
         #     data = data_for_csv[case_index] + [list_to_csv]
         #     data_for_csv.update({case_index: data})
 
+    for life_span_res, game_name in zip(set_of_life_spans, game_name_list):
+        list_to_print = []
+        for t, val in zip(life_span_res[0], life_span_res[1]):
+            list_to_print.append([t.strftime('%Y-%m-%d %H:%M:%S'), val])
+        print "{}: {}".format(game_name, list_to_print)
     print 'iter_quantity={}'.format(iter_quantity)
     print "*********************************************************"
     #
