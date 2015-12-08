@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 
 
 def get_restaurants():
@@ -13,7 +14,15 @@ def get_restaurants():
         ['restaurants_2009_3_12.txt', datetime(2009, 3, 12)]]
 
     restaurants = {}
+    restaurants_list = []
     time_for_norm_obj = []
+    with open('restaurants/restaurants_golden.txt') as f0:
+        for line in f0:
+            params = line.strip().split('\t')
+            rest_name = re.sub(r'\W+', '', params[0])
+            restaurants_list.append(rest_name)
+
+    rest_list = []
     for i in time_point_list:
         with open('restaurants/' + i[0]) as f:
             t = i[1]
@@ -22,9 +31,12 @@ def get_restaurants():
                 params = line.strip().split('\t')
                 if len(params) < 2:
                     continue
-                source = params[0]
-                rest_name = params[1]
-                addr = params[2] if len(params) >= 3 else 'None'
+                source = re.sub(r'\W+', '', params[0])
+                rest_name = re.sub(r'\W+', '', params[1]).lower()
+                if rest_name in restaurants_list:
+                    if rest_name not in rest_list:
+                        rest_list.append(rest_name)
+                addr = re.sub(r'\W+', '', params[2]).lower() if len(params) >= 3 else 'None'
                 rest_obj = restaurants.get(rest_name)
                 if not rest_obj:
                     rest_obj = {}
@@ -48,4 +60,19 @@ def get_restaurants():
     normalizing_object = {}
     for s in observed_keys:
         normalizing_object.update({s: [time_for_norm_obj, values_for_norm_obj]})
-    return [normalizing_object] + restaurants.values()
+
+    n = 0
+    n_list = []
+    with open('restaurants/restaurants_golden.txt') as f0:
+        for line in f0:
+            params = line.strip().split('\t')
+            rest_name = re.sub(r'\W+', '', params[0])
+            rest_val = re.sub(r'\W+', '', params[1])
+            if rest_name in rest_list:
+                if rest_val == 'N':
+                    n += 1
+                    n_list.append(rest_name)
+    print 'n = {}'.format(n)
+    rest_names = sorted(restaurants.keys())
+    rest_values = [restaurants.get(name) for name in rest_names]
+    return [normalizing_object] + rest_values, rest_names, n_list

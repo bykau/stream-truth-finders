@@ -45,21 +45,8 @@ def cef_initialization(c, e, observed, sources):
 
     return cef_measures
 
-headers = ['Round', 'Life span',
-            'S1.C', 'S1.E', 'S1.F, days',
-            'S2.C', 'S2.E', 'S2.F, days',
-            'S3.C', 'S3.E', 'S3.F, days',
-            'S4.C', 'S4.E', 'S4.F, days',
-            'S5.C', 'S5.E', 'S5.F, days',
-            'S6.C', 'S6.E', 'S6.F, days',
-            'S7.C', 'S7.E', 'S7.F, days',
-            'S8.C', 'S8.E', 'S8.F, days',
-            'S9.C', 'S9.E', 'S9.F, days',
-            'S10.C', 'S10.E', 'S10.F, days']
-
 if __name__ == '__main__':
-    # raw_cases = get_observed_cases()
-    raw_cases = get_restaurants()
+    raw_cases, restaurants_names, n_list = get_restaurants()
     observed_cases = cook_raw_value(raw_cases)
     observed_keys = sorted(['MenuPages', 'TasteSpace', 'NYMag', 'NYTimes', 'ActiveDiner', 'TimeOut',
                             'SavoryCities', 'VillageVoice', 'FoodBuzz', 'NewYork', 'OpenTable', 'DiningGuide'])
@@ -79,37 +66,7 @@ if __name__ == '__main__':
         for t, val in zip(life_span[0], life_span[1]):
             life_span_to_csv.append([t.strftime('%Y-%m-%d'), val])
         cef_for_csv = []
-        for s in observed_keys:
-            try:
-                cef = cef_measures[s]
-            except TypeError:
-                pass
-            f_for_print = ['{}: {}'.format(t.days, cef[2][t]) for t in sorted(cef[2].keys())]
-            cef_for_csv += [round(cef[0], 3), round(cef[1], 3), f_for_print]
-        data_for_csv.update({case_number: [headers, [0] + [life_span_to_csv] + cef_for_csv]})
     print '---------------------'
-
-    # # for testing cef measures
-    # ground_truth = [set_of_life_spans[0]]
-    # for i in ground_truth_list:
-    #     time_i = []
-    #     for j in i[0]:
-    #         time_i.append(datetime.datetime.strptime(j, '%Y-%m-%d %H:%M:%S'))
-    #     ground_truth.append([time_i, i[1]])
-    # cef_gt = []
-    # observed_cases_changed = [] + observed_cases
-    # for observed_case_index in range(cases_number):
-    #     observed_cases_changed[observed_case_index].update({'life_span': ground_truth[observed_case_index]})
-    # observed_cases_changed = cook_raw_value(observed_cases_changed)
-    #
-    # for s in observed_keys:
-    #     sources_data = []
-    #     for case in raw_cases:
-    #         sources_data.append(case.get(s))
-    #     cef = get_CEF(life_span_set=ground_truth,
-    #                   sources_data=sources_data)
-    #     cef_gt.append(cef)
-    # # end testing cef measures
 
     cef_for_each_s_old = [cef_measures.get(s) for s in observed_keys]
     ce_delta_sum = [1, 1]
@@ -148,7 +105,6 @@ if __name__ == '__main__':
             for i in range(len(ce_delta_sum)):
                 ce_delta_sum[i] += diff_for_s[i]
         cef_for_each_s_old = cef_for_each_s
-        # majority_voting_result = majority_voting(observed_cases_changed)
         # levenshtein_distance = get_levenshtein_distance(ground_truth_list, set_of_life_spans[1:])
         # levenshtein_distance_m_voting = get_levenshtein_distance(ground_truth_list, majority_voting_result[1:])
 
@@ -174,8 +130,26 @@ if __name__ == '__main__':
         #     data = data_for_csv[case_index] + [list_to_csv]
         #     data_for_csv.update({case_index: data})
 
+
+    majority_voting_result = majority_voting(observed_cases_changed)
     print 'iter_quantity={}'.format(iter_quantity)
     print "*********************************************************"
+    n = 0
+    n_mv = 0
+    for l_s, rest_name, mv_res in zip(set_of_life_spans[1:], restaurants_names, majority_voting_result):
+        if rest_name in n_list:
+            if l_s[1][-1] == 'None':
+                n += 1
+            if mv_res[1][-1] == 'None':
+                n_mv += 1
+    print 'n resulting = {}'.format(n)
+    print 'n_mv resulting = {}'.format(n_mv)
+
+    n2 = 0
+    for l_s in set_of_life_spans:
+        if len(l_s[1]) > 1 and l_s[1].count('None') == 1 and l_s[1][-1] == 'None':
+            n2 += 1
+    print 'n closed all = {}'.format(n2)
     #
     # with open('output_data.csv', 'w') as result_file:
     #     wr = csv.writer(result_file,  dialect='excel')
