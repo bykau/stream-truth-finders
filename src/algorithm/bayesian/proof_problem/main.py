@@ -7,12 +7,12 @@ Data Fusion: Resolvnig Conflicts from Multiple Sources
 '''
 
 import os
+import sys
 import csv
 import random
 import numpy as np
 
 
-p_true = 0.7
 s_number = 5
 max_rounds = 30
 eps = 0.01
@@ -21,7 +21,7 @@ obj_list = [None]*len(truth_obj_list)
 accuracy_list = [0.8]*s_number
 
 
-def get_data():
+def get_data(p_true):
     observed_data = []
     for s in range(s_number):
         s_data = []
@@ -78,13 +78,16 @@ def get_levenshtein_distance(gt, ls):
 
 
 if __name__ == '__main__':
-    data = get_data()
+    args = sys.argv[1:]
+    if len(args) != 1:
+        print '** Parameters error **'
+        sys.exit(1)
+    p_true = float(args[0])
+
+    data = get_data(p_true)
     n_list = get_n_params(data)
     accuracy_delta = 0.3
     iter_number = 0
-
-    for i in data:
-        print i
 
     while accuracy_delta > eps and iter_number < max_rounds:
         for obj_index in range(len(data[0])):
