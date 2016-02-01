@@ -52,7 +52,7 @@ def get_accuracy(data, obj_list):
         for index, obj in enumerate(obj_list):
             if obj == data[s_index][index]:
                 s_true_nubmer += 1
-        accuracy = s_true_nubmer/size_of_val
+        accuracy = s_true_nubmer/(size_of_val+0.2*size_of_val)
         accuracy_list.append(accuracy)
         s_true_nubmer = 0.
     return accuracy_list
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     for i in data:
         print i
 
-    while accuracy_delta > eps or iter_number < max_rounds:
+    while accuracy_delta > eps and iter_number < max_rounds:
         for obj_index in range(len(data[0])):
             likelihood = {}
             n = n_list[obj_index]
@@ -94,5 +94,11 @@ if __name__ == '__main__':
             max_likelihood_value = likelihood[max(likelihood.keys())]
             obj_list[obj_index] = max_likelihood_value
 
-        accuracy_prev = accuracy
-        accuracy = get_accuracy(data, obj_list)
+        accuracy_prev = accuracy_list
+        accuracy_list = get_accuracy(data, obj_list)
+        accuracy_delta = max([abs(k-l) for k, l in zip(accuracy_prev, accuracy_list)])
+        iter_number += 1
+        print accuracy_delta
+        pass
+    print obj_list
+    print iter_number
