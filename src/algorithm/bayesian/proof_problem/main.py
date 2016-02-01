@@ -6,6 +6,8 @@ Data Fusion: Resolvnig Conflicts from Multiple Sources
 @author: Evgeny Krivosheev (krivosheevevgeny@gmail.com)
 '''
 
+import os
+import csv
 import random
 import numpy as np
 
@@ -59,7 +61,6 @@ def get_accuracy(data, obj_list):
 
 
 def get_levenshtein_distance(gt, ls):
-    levenshtein_distance = []
     len_gt = len(gt)
     len_ls = len(ls)
     dist = [[0 for j in range(len_ls+1)] for i in range(len_gt+1)]
@@ -72,8 +73,7 @@ def get_levenshtein_distance(gt, ls):
             if i > 0 and j > 0:
                 a = dist[i-1][j-1] if gt[i-1] == ls[j-1] else dist[i-1][j-1] + 1
                 dist[i][j] = min(dist[i][j-1] + 1, dist[i-1][j] + 1, a)
-    levenshtein_distance.append(dist[len_gt][len_ls])
-
+    levenshtein_distance = dist[len_gt][len_ls]
     return levenshtein_distance
 
 
@@ -119,8 +119,18 @@ if __name__ == '__main__':
         iter_number += 1
         print accuracy_delta
 
+    edit_distance = get_levenshtein_distance(truth_obj_list, obj_list)
+    headers = ['edit_dist', 'p_true', 'iter_number']
+    list_to_csv = [edit_distance, p_true, iter_number]
+    with open('proof_prob_output.csv', 'a') as stats_file:
+        wr = csv.writer(stats_file,  dialect='excel')
+        if os.stat("proof_prob_output.csv").st_size == 0:
+            wr.writerows([headers, list_to_csv])
+        else:
+            wr.writerows([list_to_csv])
+
     print "acc:{}".format(accuracy_list)
     print "obj:{}".format(obj_list)
     print "gt :{}".format(truth_obj_list)
-    print "edit_dist: {}".format(get_levenshtein_distance(truth_obj_list, obj_list))
+    print "edit_dist: {}".format(edit_distance)
     print "iter_numner:{}".format(iter_number)
