@@ -46,7 +46,15 @@ def get_n_params(data):
 
 def get_accuracy(data, obj_list):
     accuracy_list = []
-
+    s_true_nubmer = 0.
+    size_of_val = len(obj_list)
+    for s_index in range(s_number):
+        for index, obj in enumerate(obj_list):
+            if obj == data[s_index][index]:
+                s_true_nubmer += 1
+        accuracy = s_true_nubmer/size_of_val
+        accuracy_list.append(accuracy)
+        s_true_nubmer = 0.
     return accuracy_list
 
 
