@@ -58,6 +58,25 @@ def get_accuracy(data, obj_list):
     return accuracy_list
 
 
+def get_levenshtein_distance(gt, ls):
+    levenshtein_distance = []
+    len_gt = len(gt)
+    len_ls = len(ls)
+    dist = [[0 for j in range(len_ls+1)] for i in range(len_gt+1)]
+    for i in range(len_gt+1):
+        for j in range(len_ls+1):
+            if i == 0:
+                dist[i][j] = j
+            elif j == 0:
+                dist[i][j] = i
+            if i > 0 and j > 0:
+                a = dist[i-1][j-1] if gt[i-1] == ls[j-1] else dist[i-1][j-1] + 1
+                dist[i][j] = min(dist[i][j-1] + 1, dist[i-1][j] + 1, a)
+    levenshtein_distance.append(dist[len_gt][len_ls])
+
+    return levenshtein_distance
+
+
 if __name__ == '__main__':
     data = get_data()
     n_list = get_n_params(data)
@@ -99,6 +118,9 @@ if __name__ == '__main__':
         accuracy_delta = max([abs(k-l) for k, l in zip(accuracy_prev, accuracy_list)])
         iter_number += 1
         print accuracy_delta
-        pass
-    print obj_list
-    print iter_number
+
+    print "acc:{}".format(accuracy_list)
+    print "obj:{}".format(obj_list)
+    print "gt :{}".format(truth_obj_list)
+    print "edit_dist: {}".format(get_levenshtein_distance(truth_obj_list, obj_list))
+    print "iter_numner:{}".format(iter_number)
