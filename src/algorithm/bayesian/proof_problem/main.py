@@ -151,32 +151,30 @@ def get_dist_metric(data, prob):
 
 if __name__ == '__main__':
     for i in range(numb_of_swaps):
-        accuracy_delta = 0.3
-        iter_number = 0
-        accuracy_list = [0.8]*s_number
-        data = copy.deepcopy(data_init)
-        data = swap_data(data, i)
-        while accuracy_delta > eps and iter_number < max_rounds:
-            try:
-                prob = get_prob(data=data, accuracy=accuracy_list)
-            except ZeroDivisionError:
-                print i
-            accuracy_prev = accuracy_list
-            accuracy_list = get_accuracy(data, prob)
-            accuracy_delta = max([abs(k-l) for k, l in zip(accuracy_prev, accuracy_list)])
-            iter_number += 1
-        dist_metric = get_dist_metric(data, prob)
+        for j in range(10):
+            accuracy_delta = 0.3
+            iter_number = 0
+            accuracy_list = [0.8]*s_number
+            data = copy.deepcopy(data_init)
+            data = swap_data(data, i)
+            while accuracy_delta > eps and iter_number < max_rounds:
+                try:
+                    prob = get_prob(data=data, accuracy=accuracy_list)
+                except ZeroDivisionError:
+                    print i
+                accuracy_prev = accuracy_list
+                accuracy_list = get_accuracy(data, prob)
+                accuracy_delta = max([abs(k-l) for k, l in zip(accuracy_prev, accuracy_list)])
+                iter_number += 1
+            dist_metric = get_dist_metric(data, prob)
 
-        # print "acc:{}".format(accuracy_list)
-        print "dist_metric: {}".format(dist_metric)
-        # print "iter_numner:{}".format(iter_number)
+            headers = ['dist_metric', 'iter_number', 'sources accuracy']
+            list_to_csv = [dist_metric, iter_number, accuracy_list]
+            with open('proof_prob_output.csv', 'a') as stats_file:
+                wr = csv.writer(stats_file,  dialect='excel')
+                if os.stat("proof_prob_output.csv").st_size == 0:
+                    wr.writerows([headers, list_to_csv])
+                else:
+                    wr.writerows([list_to_csv])
 
-        # headers = ['edit_dist', 'p_true', 'iter_number']
-        # list_to_csv = [edit_distance, p_true, iter_number]
-        # with open('proof_prob_output.csv', 'a') as stats_file:
-        #     wr = csv.writer(stats_file,  dialect='excel')
-        #     if os.stat("proof_prob_output.csv").st_size == 0:
-        #         wr.writerows([headers, list_to_csv])
-        #     else:
-        #         wr.writerows([list_to_csv])
-
+            print "dist_metric: {}".format(dist_metric)
