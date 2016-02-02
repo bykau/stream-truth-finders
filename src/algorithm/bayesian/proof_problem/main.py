@@ -10,34 +10,34 @@ import os
 import sys
 import csv
 import numpy as np
+import copy
 
 
 s_number = 5
 max_rounds = 30
 eps = 0.01
+numb_of_swaps = 100
 truth_obj_list = [6, 8, 8, 15, 16, 10, 10, 7, 18, 20]
-res_obj_list = [None]*len(truth_obj_list)
-accuracy_list = [0.8]*s_number
 
-data = [
+data_init = [
     [6, 8, None, 15, 16, None, 10, 8, 16, 20],
     [6, None, 8, 15, 16, 7, 9, None, None, 20],
     [None, 6, 13, 15, None, 10, 10, 7, None, 21],
     [6, None, 8, 13, None, 10, 10, 7, 18, None],
     [None, 8, 8, 15, 16, 8, 2, None, None, 20]
 ]
-prob_gt = [
-    [1],
-    [0, 1],
-    [1, 1],
-    [0, 1],
-    [1],
-    [0, 0, 1],
-    [0, 0, 1],
-    [1, 0],
-    [0, 1],
-    [1, 0]
-]
+# prob_gt = [
+#     [1],
+#     [0, 1],
+#     [1, 0],
+#     [0, 1],
+#     [1],
+#     [0, 0, 1],
+#     [0, 0, 1],
+#     [1, 0],
+#     [0, 1],
+#     [1, 0]
+# ]
 
 
 def get_n_params(data):
@@ -79,7 +79,7 @@ def get_accuracy(data, prob):
 def get_prob(data, accuracy):
     n_list = get_n_params(data)
     likelihood = []
-    for obj_index in range(len(data[0])):
+    for obj_index in range(len(truth_obj_list)):
             likelihood.append([])
             n = n_list[obj_index]
             observed_values = sorted([obj[obj_index] for obj in data])
@@ -107,34 +107,76 @@ def get_prob(data, accuracy):
     return likelihood
 
 
-if __name__ == '__main__':
-    accuracy_delta = 0.3
-    iter_number = 0
+def swap_data(data, n):
+    for i in range(n):
+        s_index = np.random.randint(5, size=1)[0]
+        swapped = False
+        while not swapped:
+            obj_index = np.random.randint(10, size=1)[0]
+            v = data[s_index][obj_index]
+            if v:
+                data[s_index][obj_index] = None
+                while not swapped:
+                    obj_index2 = np.random.randint(10, size=1)[0]
+                    if obj_index2 == obj_index:
+                        continue
+                    if not data[s_index][obj_index2]:
+                        data[s_index][obj_index2] = v
+                        swapped = True
+    return data
 
-    while accuracy_delta > eps and iter_number < max_rounds:
-        prob = get_prob(data=data, accuracy=accuracy_list)
-        accuracy_prev = accuracy_list
-        accuracy_list = get_accuracy(data, prob)
-        accuracy_delta = max([abs(k-l) for k, l in zip(accuracy_prev, accuracy_list)])
-        iter_number += 1
 
+def get_dist_metric(data, prob):
+    prob_gt = []
+    for obj_index in range(len(data[0])):
+        observed_values = sorted([obj[obj_index] for obj in data])
+        possible_values = sorted(list(set(observed_values)-set([None])))
+        prob_gt.append(possible_values)
+    for obj_ind, v_true in enumerate(truth_obj_list):
+        for v_ind, v in enumerate(prob_gt[obj_ind]):
+            if v == v_true:
+                prob_gt[obj_ind][v_ind] = 1
+            else:
+                prob_gt[obj_ind][v_ind] = 0
     prob_gt_vector = []
     prob_vector = []
     for i in range(len(prob_gt)):
         prob_gt_vector += prob_gt[i]
         prob_vector += prob[i]
+
     dist_metric = np.dot(prob_gt_vector, prob_vector)
 
-    print "acc:{}".format(accuracy_list)
-    print "dist_metric: {}".format(dist_metric)
-    print "iter_numner:{}".format(iter_number)
+    return dist_metric
 
-    # headers = ['edit_dist', 'p_true', 'iter_number']
-    # list_to_csv = [edit_distance, p_true, iter_number]
-    # with open('proof_prob_output.csv', 'a') as stats_file:
-    #     wr = csv.writer(stats_file,  dialect='excel')
-    #     if os.stat("proof_prob_output.csv").st_size == 0:
-    #         wr.writerows([headers, list_to_csv])
-    #     else:
-    #         wr.writerows([list_to_csv])
+
+if __name__ == '__main__':
+    for i in range(numb_of_swaps):
+        accuracy_delta = 0.3
+        iter_number = 0
+        accuracy_list = [0.8]*s_number
+        data = copy.deepcopy(data_init)
+        data = swap_data(data, i)
+        while accuracy_delta > eps and iter_number < max_rounds:
+            try:
+                prob = get_prob(data=data, accuracy=accuracy_list)
+            except ZeroDivisionError:
+                print i
+            accuracy_prev = accuracy_list
+            accuracy_list = get_accuracy(data, prob)
+            accuracy_delta = max([abs(k-l) for k, l in zip(accuracy_prev, accuracy_list)])
+            iter_number += 1
+        dist_metric = get_dist_metric(data, prob)
+
+        # print "acc:{}".format(accuracy_list)
+        print "dist_metric: {}".format(dist_metric)
+        # print "iter_numner:{}".format(iter_number)
+
+        # headers = ['edit_dist', 'p_true', 'iter_number']
+        # list_to_csv = [edit_distance, p_true, iter_number]
+        # with open('proof_prob_output.csv', 'a') as stats_file:
+        #     wr = csv.writer(stats_file,  dialect='excel')
+        #     if os.stat("proof_prob_output.csv").st_size == 0:
+        #         wr.writerows([headers, list_to_csv])
+        #     else:
+        #         wr.writerows([list_to_csv])
 
