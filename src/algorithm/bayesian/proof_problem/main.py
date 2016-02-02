@@ -16,7 +16,7 @@ import copy
 s_number = 5
 max_rounds = 30
 eps = 0.01
-numb_of_swaps = 100
+numb_of_swaps = 101
 truth_obj_list = [6, 8, 8, 15, 16, 10, 10, 7, 18, 20]
 
 data_init = [
@@ -151,6 +151,7 @@ def get_dist_metric(data, prob):
 
 if __name__ == '__main__':
     for i in range(numb_of_swaps):
+        dist_metric_list = []
         for j in range(10):
             accuracy_delta = 0.3
             iter_number = 0
@@ -167,14 +168,17 @@ if __name__ == '__main__':
                 accuracy_delta = max([abs(k-l) for k, l in zip(accuracy_prev, accuracy_list)])
                 iter_number += 1
             dist_metric = get_dist_metric(data, prob)
-
-            headers = ['dist_metric', 'iter_number', 'sources accuracy']
-            list_to_csv = [dist_metric, iter_number, accuracy_list]
-            with open('proof_prob_output.csv', 'a') as stats_file:
-                wr = csv.writer(stats_file,  dialect='excel')
-                if os.stat("proof_prob_output.csv").st_size == 0:
-                    wr.writerows([headers, list_to_csv])
-                else:
-                    wr.writerows([list_to_csv])
-
+            dist_metric_list.append(dist_metric)
             print "dist_metric: {}".format(dist_metric)
+
+        dist_metric_mean = np.mean(dist_metric_list)
+        dist_metric_std = np.std(dist_metric_list)
+        headers = ['dist_metric_mean', 'dist_metric_std', 'number_of_swaps']
+        list_to_csv = [dist_metric_mean, dist_metric_std, i]
+        with open('proof_prob_output.csv', 'a') as stats_file:
+            wr = csv.writer(stats_file,  dialect='excel')
+            if os.stat("proof_prob_output.csv").st_size == 0:
+                wr.writerows([headers, list_to_csv])
+            else:
+                wr.writerows([list_to_csv])
+
