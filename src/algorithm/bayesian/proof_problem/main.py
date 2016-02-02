@@ -7,7 +7,6 @@ Data Fusion: Resolvnig Conflicts from Multiple Sources
 '''
 
 import os
-import sys
 import csv
 import numpy as np
 import copy
@@ -159,10 +158,7 @@ if __name__ == '__main__':
             data = copy.deepcopy(data_init)
             data = swap_data(data, i)
             while accuracy_delta > eps and iter_number < max_rounds:
-                try:
-                    prob = get_prob(data=data, accuracy=accuracy_list)
-                except ZeroDivisionError:
-                    print i
+                prob = get_prob(data=data, accuracy=accuracy_list)
                 accuracy_prev = accuracy_list
                 accuracy_list = get_accuracy(data, prob)
                 accuracy_delta = max([abs(k-l) for k, l in zip(accuracy_prev, accuracy_list)])
@@ -181,4 +177,3 @@ if __name__ == '__main__':
                 wr.writerows([headers, list_to_csv])
             else:
                 wr.writerows([list_to_csv])
-
