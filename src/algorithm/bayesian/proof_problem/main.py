@@ -19,12 +19,19 @@ numb_of_swaps = 101
 truth_obj_list = [6, 8, 8, 15, 16, 10, 10, 7, 18, 20]
 
 data_init = [
-    [6, 8, None, 15, 16, None, 10, 8, 16, 20],
-    [6, None, 8, 15, 16, 7, 9, None, None, 20],
-    [None, 6, 13, 15, None, 10, 10, 7, None, 21],
-    [6, None, 8, 13, None, 10, 10, 7, 18, None],
-    [None, 8, 8, 15, 16, 8, 2, None, None, 20]
+    [6, 8, None, 15, None, None, 10, 7, 18, 20],
+    [6, None, 8, 15, 16, 10, 10, None, None, 20],
+    [None, 8, 8, 15, None, 10, 10, 7, None, 20],
+    [6, None, 8, 15, None, 10, 10, 7, 18, None],
+    [None, 8, 8, 15, 16, 10, 10, None, None, 20]
 ]
+# data_init = [
+#     [6, 8, None, 15, 16, None, 10, 8, 16, 20],
+#     [6, None, 8, 15, 16, 7, 9, None, None, 20],
+#     [None, 6, 13, 15, None, 10, 10, 7, None, 21],
+#     [6, None, 8, 13, None, 10, 10, 7, 18, None],
+#     [None, 8, 8, 15, 16, 8, 2, None, None, 20]
+# ]
 # prob_gt = [
 #     [1],
 #     [0, 1],
@@ -84,16 +91,28 @@ def get_prob(data, accuracy):
             observed_values = sorted([obj[obj_index] for obj in data])
             possible_values = sorted(list(set(observed_values)-set([None])))
             if n == 0:
-                likelihood[obj_index].append(0.99)
+                likelihood[obj_index].append(1.)
                 continue
+            break_flag = False
             for v_true in possible_values:
                 a, b, b_sum = 1., 1., 0.
                 a_not_completed = True
                 for v_possible in possible_values:
+                    if break_flag:
+                        break
                     for v, s_index in zip(observed_values, range(s_number)):
                         if v == None:
                             continue
                         accuracy = accuracy_list[s_index]
+                        if accuracy == 1.:
+                            if v == v_true:
+                                likelihood[obj_index].append(1.)
+                                break_flag = True
+                                break
+                            else:
+                                likelihood[obj_index].append(0.)
+                                break_flag = True
+                                break
                         if v == v_possible:
                             b *= n*accuracy/(1-accuracy)
                         if a_not_completed and v == v_true:
@@ -101,12 +120,15 @@ def get_prob(data, accuracy):
                     a_not_completed = False
                     b_sum += b
                     b = 1
+                if break_flag:
+                    break_flag = False
+                    continue
                 p = a/b_sum
                 likelihood[obj_index].append(p)
     return likelihood
 
 
-def swap_data(data, n):
+def swap_random(data, n):
     for i in range(n):
         s_index = np.random.randint(5, size=1)[0]
         swapped = False
@@ -123,6 +145,23 @@ def swap_data(data, n):
                         data[s_index][obj_index2] = v
                         swapped = True
     return data
+
+
+def get_swap_cases(data):
+    possible_cases = []
+    for s_ind in range(s_number):
+        observed_values = copy.copy(data[s_ind])
+        for v_ind, v in enumerate(observed_values):
+            if not v:
+                continue
+            for v2_ind, v2 in enumerate(observed_values):
+                if v2:
+                    continue
+                new_case = copy.deepcopy(data)
+                new_case[s_ind][v2_ind] = v
+                new_case[s_ind][v_ind] = None
+                possible_cases.append(new_case)
+    return possible_cases
 
 
 def get_dist_metric(data, prob):
@@ -142,38 +181,44 @@ def get_dist_metric(data, prob):
     for i in range(len(prob_gt)):
         prob_gt_vector += prob_gt[i]
         prob_vector += prob[i]
-
     dist_metric = np.dot(prob_gt_vector, prob_vector)
-
     return dist_metric
 
 
 if __name__ == '__main__':
-    for i in range(numb_of_swaps):
-        dist_metric_list = []
-        for j in range(10):
-            accuracy_delta = 0.3
-            iter_number = 0
-            accuracy_list = [0.8]*s_number
-            data = copy.deepcopy(data_init)
-            data = swap_data(data, i)
-            while accuracy_delta > eps and iter_number < max_rounds:
-                prob = get_prob(data=data, accuracy=accuracy_list)
-                accuracy_prev = accuracy_list
-                accuracy_list = get_accuracy(data, prob)
-                accuracy_delta = max([abs(k-l) for k, l in zip(accuracy_prev, accuracy_list)])
-                iter_number += 1
-            dist_metric = get_dist_metric(data, prob)
-            dist_metric_list.append(dist_metric)
-            print "dist_metric: {}".format(dist_metric)
+    possible_cases = []
+    possible_cases.append(data_init)
+    possible_cases += get_swap_cases(copy.deepcopy(data_init))
+    # possible_cases = []
+    # possible_cases.append(data_init)
+    dist_metric_list = []
+    for data in possible_cases:
+        accuracy_delta = 0.3
+        iter_number = 0
+        accuracy_list = [0.8]*s_number
+        while accuracy_delta > eps and iter_number < max_rounds:
+            prob = get_prob(data=data, accuracy=accuracy_list)
+            accuracy_prev = accuracy_list
+            accuracy_list = get_accuracy(data, prob)
+            accuracy_delta = max([abs(k-l) for k, l in zip(accuracy_prev, accuracy_list)])
+            iter_number += 1
+        dist_metric = get_dist_metric(data, prob)
+        dist_metric_list.append(dist_metric)
+        # print "dist_metric: {}".format(dist_metric)
+    max_dist_metr = max(dist_metric_list)
+    print 'iter_number: {}'.format(iter_number)
+    print 'ind: {}'.format(dist_metric_list.index(max_dist_metr))
+    print 'max_dist_metr: {}'.format(max_dist_metr)
+    for i in possible_cases[dist_metric_list.index(max_dist_metr)]:
+        print i
 
-        dist_metric_mean = np.mean(dist_metric_list)
-        dist_metric_std = np.std(dist_metric_list)
-        headers = ['dist_metric_mean', 'dist_metric_std', 'number_of_swaps']
-        list_to_csv = [dist_metric_mean, dist_metric_std, i]
-        with open('proof_prob_output.csv', 'a') as stats_file:
-            wr = csv.writer(stats_file,  dialect='excel')
-            if os.stat("proof_prob_output.csv").st_size == 0:
-                wr.writerows([headers, list_to_csv])
-            else:
-                wr.writerows([list_to_csv])
+        # dist_metric_mean = np.mean(dist_metric_list)
+        # dist_metric_std = np.std(dist_metric_list)
+        # headers = ['dist_metric_mean', 'dist_metric_std', 'number_of_swaps']
+        # list_to_csv = [dist_metric_mean, dist_metric_std, i]
+        # with open('proof_prob_output.csv', 'a') as stats_file:
+        #     wr = csv.writer(stats_file,  dialect='excel')
+        #     if os.stat("proof_prob_output.csv").st_size == 0:
+        #         wr.writerows([headers, list_to_csv])
+        #     else:
+        #         wr.writerows([list_to_csv])
