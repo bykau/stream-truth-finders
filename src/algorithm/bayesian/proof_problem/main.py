@@ -16,14 +16,14 @@ s_number = 5
 max_rounds = 30
 eps = 0.01
 numb_of_swaps = 101
-truth_obj_list = [6, 8, 8, 15, 16, 10, 10, 7, 18, 20]
+truth_obj_list = [6, 8, 9, 15, 16, 10, 11, 7, 18, 20]
 
 data_init = [
-    [6, 8, None, 15, None, None, 10, 7, 18, 20],
-    [6, None, 8, 15, 16, 10, 10, None, None, 20],
-    [None, 8, 8, 15, None, 10, 10, 7, None, 20],
-    [6, None, 8, 15, None, 10, 10, 7, 18, None],
-    [None, 8, 8, 15, 16, 10, 10, None, None, 20]
+    [6, 8, None, 15, None, None, 11, 7, 18, 20],
+    [6, None, 9, 15, 16, 10, 11, None, None, 20],
+    [None, 8, 9, 15, None, 10, 11, 7, None, 20],
+    [6, None, 9, 15, None, 10, 11, 7, 18, None],
+    [None, 8, 9, 15, 16, 10, 11, None, None, 20]
 ]
 # data_init = [
 #     [6, 8, None, 15, 16, None, 10, 8, 16, 20],
@@ -72,12 +72,9 @@ def get_accuracy(data, prob):
             possible_values = sorted(list(set(observed_values)-set([None])))
             for v_ind, v in enumerate(possible_values):
                 if v == observed_val:
-                    try:
-                        p_sum += prob[obj_index][v_ind]
-                    except IndexError:
-                        pass
+                    p_sum += prob[obj_index][v_ind]
                     break
-        accuracy = p_sum/size
+        accuracy = 0.9*p_sum/size
         accuracy_list.append(accuracy)
     return accuracy_list
 
@@ -93,26 +90,26 @@ def get_prob(data, accuracy):
             if n == 0:
                 likelihood[obj_index].append(1.)
                 continue
-            break_flag = False
+            # break_flag = False
             for v_true in possible_values:
                 a, b, b_sum = 1., 1., 0.
                 a_not_completed = True
                 for v_possible in possible_values:
-                    if break_flag:
-                        break
+                    # if break_flag:
+                    #     break
                     for v, s_index in zip(observed_values, range(s_number)):
                         if v == None:
                             continue
                         accuracy = accuracy_list[s_index]
-                        if accuracy == 1.:
-                            if v == v_true:
-                                likelihood[obj_index].append(1.)
-                                break_flag = True
-                                break
-                            else:
-                                likelihood[obj_index].append(0.)
-                                break_flag = True
-                                break
+                        # if accuracy == 1.:
+                            # if v == v_true:
+                            #     likelihood[obj_index].append(1.)
+                            #     break_flag = True
+                            #     break
+                            # else:
+                            #     likelihood[obj_index].append(0.)
+                            #     break_flag = True
+                            #     break
                         if v == v_possible:
                             b *= n*accuracy/(1-accuracy)
                         if a_not_completed and v == v_true:
@@ -120,9 +117,9 @@ def get_prob(data, accuracy):
                     a_not_completed = False
                     b_sum += b
                     b = 1
-                if break_flag:
-                    break_flag = False
-                    continue
+                # if break_flag:
+                #     break_flag = False
+                #     continue
                 p = a/b_sum
                 likelihood[obj_index].append(p)
     return likelihood
