@@ -10,28 +10,30 @@ import os
 import csv
 import numpy as np
 import copy
+import random
 
 
 s_number = 5
 max_rounds = 30
-eps = 0.01
+eps = 0.001
 numb_of_swaps = 101
 truth_obj_list = [6, 8, 9, 15, 16, 10, 11, 7, 18, 20]
-
-data_init = [
-    [6, 8, None, 15, None, None, 11, 7, 18, 20],
-    [6, None, 9, 15, 16, 10, 11, None, None, 20],
-    [None, 8, 9, 15, None, 10, 11, 7, None, 20],
-    [6, None, 9, 15, None, 10, 11, 7, 18, None],
-    [None, 8, 9, 15, 16, 10, 11, None, None, 20]
-]
+# All values are true
 # data_init = [
-#     [6, 8, None, 15, 16, None, 10, 8, 16, 20],
-#     [6, None, 8, 15, 16, 7, 9, None, None, 20],
-#     [None, 6, 13, 15, None, 10, 10, 7, None, 21],
-#     [6, None, 8, 13, None, 10, 10, 7, 18, None],
-#     [None, 8, 8, 15, 16, 8, 2, None, None, 20]
+#     [6, 8, None, 15, None, None, 11, 7, 18, 20],
+#     [6, None, 9, 15, 16, 10, 11, None, None, 20],
+#     [None, 8, 9, 15, None, 10, 11, 7, None, 20],
+#     [6, None, 9, 15, None, 10, 11, 7, 18, None],
+#     [None, 8, 9, 15, 16, 10, 11, None, None, 20]
 # ]
+# data_init = [
+#     [6, 19, None, 15, None, 16, 11, 5, 18, 20],
+#     [6, None, 9, 15, 16, 22, 21, None, None, 20],
+#     [None, 8, 23, 15, None, 10, 11, 7, None, 24],
+#     [13, None, 9, 15, None, 10, 11, 7, 18, None],
+#     [None, 8, 9, 15, 16, 28, 12, None, None, 20]
+# ]
+
 # prob_gt = [
 #     [1],
 #     [0, 1],
@@ -44,6 +46,28 @@ data_init = [
 #     [0, 1],
 #     [1, 0]
 # ]
+
+
+def generator():
+    case = [[None, None, 6, 6, 0],
+            [6, None, None, 8, 8]]
+    k = 20
+    markers = [True, True, None, None, False]
+    for obj_ind, obj_gt in enumerate(truth_obj_list[2:]):
+        rand_markers = sorted(markers, key=lambda k: random.random())
+        values = []
+        for i in rand_markers:
+            if i == True:
+               values.append(obj_gt)
+            elif i == False:
+                k += 1
+                values.append(k)
+            else:
+                values.append(i)
+        case.append(values)
+    case = map(list, zip(*case))
+
+    return case
 
 
 def get_n_params(data):
@@ -74,7 +98,7 @@ def get_accuracy(data, prob):
                 if v == observed_val:
                     p_sum += prob[obj_index][v_ind]
                     break
-        accuracy = 0.9*p_sum/size
+        accuracy = p_sum/size
         accuracy_list.append(accuracy)
     return accuracy_list
 
@@ -183,39 +207,42 @@ def get_dist_metric(data, prob):
 
 
 if __name__ == '__main__':
-    possible_cases = []
-    possible_cases.append(data_init)
-    possible_cases += get_swap_cases(copy.deepcopy(data_init))
-    # possible_cases = []
-    # possible_cases.append(data_init)
-    dist_metric_list = []
-    for data in possible_cases:
-        accuracy_delta = 0.3
-        iter_number = 0
-        accuracy_list = [0.8]*s_number
-        while accuracy_delta > eps and iter_number < max_rounds:
-            prob = get_prob(data=data, accuracy=accuracy_list)
-            accuracy_prev = accuracy_list
-            accuracy_list = get_accuracy(data, prob)
-            accuracy_delta = max([abs(k-l) for k, l in zip(accuracy_prev, accuracy_list)])
-            iter_number += 1
-        dist_metric = get_dist_metric(data, prob)
-        dist_metric_list.append(dist_metric)
-        # print "dist_metric: {}".format(dist_metric)
-    max_dist_metr = max(dist_metric_list)
-    print 'iter_number: {}'.format(iter_number)
-    print 'ind: {}'.format(dist_metric_list.index(max_dist_metr))
-    print 'max_dist_metr: {}'.format(max_dist_metr)
-    for i in possible_cases[dist_metric_list.index(max_dist_metr)]:
-        print i
+    for m in range(20):
+        data_init = generator()
+        possible_cases = []
+        possible_cases.append(data_init)
+        possible_cases += get_swap_cases(copy.deepcopy(data_init))
+        dist_metric_list = []
+        iter_number_list = []
+        for data in possible_cases:
+            accuracy_delta = 0.3
+            iter_number = 0
+            accuracy_list = [0.8]*s_number
+            while accuracy_delta > eps and iter_number < max_rounds:
+                prob = get_prob(data=data, accuracy=accuracy_list)
+                accuracy_prev = accuracy_list
+                accuracy_list = get_accuracy(data, prob)
+                accuracy_delta = max([abs(k-l) for k, l in zip(accuracy_prev, accuracy_list)])
+                iter_number += 1
+            dist_metric = get_dist_metric(data, prob)
+            dist_metric_list.append(dist_metric)
+            iter_number_list.append(iter_number)
+        iter_number_mean = np.mean(iter_number_list)
+        iter_number_std = np.std(iter_number_list)
+        true_swp_dist = dist_metric_list[1]
+        dist_metric_list = sorted(dist_metric_list, reverse=True)
+        true_swp_index = dist_metric_list.index(true_swp_dist)
+        max_dist_metr = dist_metric_list[0]
+        print 'max_dist_metr: {}'.format(max_dist_metr)
+        print 'true_swp_dist: {}'.format(true_swp_dist)
+        print 'true_swp_index: {}'.format(true_swp_index)
+        print '------------'
 
-        # dist_metric_mean = np.mean(dist_metric_list)
-        # dist_metric_std = np.std(dist_metric_list)
-        # headers = ['dist_metric_mean', 'dist_metric_std', 'number_of_swaps']
-        # list_to_csv = [dist_metric_mean, dist_metric_std, i]
-        # with open('proof_prob_output.csv', 'a') as stats_file:
-        #     wr = csv.writer(stats_file,  dialect='excel')
-        #     if os.stat("proof_prob_output.csv").st_size == 0:
-        #         wr.writerows([headers, list_to_csv])
-        #     else:
-        #         wr.writerows([list_to_csv])
+        headers = ['true_swp_index', 'max_dist_metr', 'true_swp_dist', 'iter_number_mean', 'iter_number_std']
+        list_to_csv = [true_swp_index, max_dist_metr, true_swp_dist, iter_number_mean, iter_number_std]
+        with open('significance_testing_data.csv', 'a') as stats_file:
+            wr = csv.writer(stats_file,  dialect='excel')
+            if os.stat("significance_testing_data.csv").st_size == 0:
+                wr.writerows([headers, list_to_csv])
+            else:
+                wr.writerows([list_to_csv])
