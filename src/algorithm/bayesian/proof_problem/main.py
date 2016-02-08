@@ -207,6 +207,7 @@ def get_dist_metric(data, prob):
 
 
 if __name__ == '__main__':
+    headers = ['true_swp_index_norm', 'max_dist_metr', 'true_swp_dist', 'iter_number_mean', 'iter_number_std']
     for m in range(20):
         data_init = generator()
         possible_cases = []
@@ -227,19 +228,21 @@ if __name__ == '__main__':
             dist_metric = get_dist_metric(data, prob)
             dist_metric_list.append(dist_metric)
             iter_number_list.append(iter_number)
+        obj_len = float(len(truth_obj_list))
         iter_number_mean = np.mean(iter_number_list)
         iter_number_std = np.std(iter_number_list)
         true_swp_dist = dist_metric_list[1]
         dist_metric_list = sorted(dist_metric_list, reverse=True)
         true_swp_index = dist_metric_list.index(true_swp_dist)
-        max_dist_metr = dist_metric_list[0]
+        swp_index_norm = (true_swp_index+1.)/len(dist_metric_list)
+        true_swp_dist /= obj_len
+        max_dist_metr = dist_metric_list[0]/obj_len
         print 'max_dist_metr: {}'.format(max_dist_metr)
         print 'true_swp_dist: {}'.format(true_swp_dist)
-        print 'true_swp_index: {}'.format(true_swp_index)
+        print 'swp_index_norm: {}'.format(swp_index_norm)
         print '------------'
 
-        headers = ['true_swp_index', 'max_dist_metr', 'true_swp_dist', 'iter_number_mean', 'iter_number_std']
-        list_to_csv = [true_swp_index, max_dist_metr, true_swp_dist, iter_number_mean, iter_number_std]
+        list_to_csv = [swp_index_norm, max_dist_metr, true_swp_dist, iter_number_mean, iter_number_std]
         with open('significance_testing_data.csv', 'a') as stats_file:
             wr = csv.writer(stats_file,  dialect='excel')
             if os.stat("significance_testing_data.csv").st_size == 0:
